@@ -16,7 +16,8 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-   origin: '*',
+   origin: 'https://platform-phi-two.vercel.app/',
+    credentials: true
 }));
 
 
