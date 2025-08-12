@@ -1,0 +1,41 @@
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Comic Sans MS', 'Marker Felt', 'Chalkboard', sans-serif, 'Rubik', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+:root {
+    --primary: #007BFF;
+    --secondary: #0055CC;
+   --accent: #FF6600;
+     --secondaryAccent: #E65C00;
+    --dark: #1A1A2E;
+    --light: #F5F5FF;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1 {
+    /* color: #ff6b88; */
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    overflow-x: hidden;
+    background-color: #FFF5E6;
+     background-image: radial-gradient(#FFD166 10%, transparent 10%);
+    background-size: 20px 20px;
+}
+

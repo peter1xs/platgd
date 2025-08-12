@@ -1,0 +1,60 @@
+.student-sidebar {
+  width: 320px;
+  background-color: white;
+  padding: 1.5rem;
+}
+
+.student-sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s;
+  color: #4A5568;
+}
+
+.student-sidebar-btn:hover {
+  background-color: #EDF2F7;
+}
+
+.student-sidebar-btn.active {
+  background-color: #EBF4FF;
+  color: #6C4DF6;
+  font-weight: bold;
+}
+
+.student-sidebar-btn .icon {
+  font-size: 3rem;
+}
+.student-sidebar-btn .icon-name{
+  font-size:25px;
+  font-weight: bold;
+}
+
+.exam-room-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.8rem 1rem;
+  margin-top: 1rem;
+  border: none;
+  background-color: #6C4DF6;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s;
+  font-weight: bold;
+}
+
+.exam-room-btn:hover {
+  background-color: #5a3dd9;
+}

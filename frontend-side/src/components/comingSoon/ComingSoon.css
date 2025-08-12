@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+
+.soonConstruction-box {
+  background-color: #fff9e6;
+  padding: 40px;
+  border-radius: 30px;
+  text-align: center;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  animation: bounceIn 1.2s ease-out;
+}
+
+.emoji {
+  font-size: 50px;
+  margin-bottom: 10px;
+  animation: bounce 1.5s infinite;
+}
+
+.soonConstruction-box h1 {
+  font-size: 2.5rem;
+  color: #ff6f00;
+  margin-bottom: 10px;
+  animation: wiggle 2s infinite;
+}
+
+.soonConstruction-box p {
+  font-size: 1.2rem;
+  color: #5d4037;
+  margin-bottom: 20px;
+  animation: fadeIn 2s ease forwards;
+}
+
+.countdown {
+  font-size: 2rem;
+  color: #d84315;
+  font-weight: bold;
+  animation: pulse 1s infinite;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+  75% { transform: rotate(-3deg); }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 500px) {
+  h1 {
+    font-size: 2rem;
+  }
+  .countdown {
+    font-size: 1.5rem;
+  }
+}

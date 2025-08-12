@@ -1,0 +1,49 @@
+
+/* Floating Shapes Animation */
+.floating-shapes {
+  position: absolute;
+  margin-left: 30%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.shape {
+  position: absolute;
+  opacity: 0.6;
+  animation: float 15s infinite ease-in-out;
+}
+
+.circle {
+  border-radius: 50%;
+  background-color: #ff9aa2;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-bottom: 50px solid #ffb7b2;
+}
+
+.star {
+  color: #ffdfba;
+  font-size: 30px;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}

@@ -1,0 +1,21 @@
+:root{
+     --primary: #007BFF;
+    --secondary: #0055CC;
+    --accent: #FF6600;
+     --secondaryAccent: #E65C00;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --bg-light: #f9fafb;
+    --white-bg: white;
+}
+
+
+.student-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+ background: linear-gradient(135deg, var(--bg-light) 0%, white 100%);
+  color: white;
+}
+

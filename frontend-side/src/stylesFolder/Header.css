@@ -1,0 +1,137 @@
+/* Header with animated gradient */
+.header {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 2rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 950px;
+ margin-top: 17rem;
+}
+
+.header-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+h1 {
+  font-size: 3.5rem;
+  margin: 0.5rem 0;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tagline {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.hero-text {
+  flex: 1;
+  text-align: center;
+}
+
+
+
+
+.hero-image {
+  flex: 1;
+  position: relative;
+}
+
+.main-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  flex: 1 1 300px;
+  min-width: 250px;
+  max-width: 350px;
+  margin: 0.5rem;
+  transform: rotate(3deg);
+  animation: float 6s ease-in-out infinite;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .main-image {
+    flex-basis: 250px;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-image {
+    gap: 15px;
+  }
+
+  .main-image {
+    flex-basis: 200px;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-image {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .main-image {
+    width: 80%;
+    max-width: 100%;
+    flex-basis: auto;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Main CTA buttons */
+.cta-button {
+  display: inline-block;
+  background-color: var(--accent);
+  color: var(--dark);
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0.5rem;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cta-secondary {
+  background: white;
+  color: var(--primary);
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}

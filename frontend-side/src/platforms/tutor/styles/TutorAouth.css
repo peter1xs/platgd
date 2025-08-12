@@ -1,0 +1,235 @@
+.student-login-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+.login-form {
+  flex: 1;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: white;
+  max-width: 500px;
+}
+
+.login-form h2 {
+  font-size: 2.5rem;
+  color: #2D3748;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.form-group.focused label {
+  top: -20px;
+  font-size: 0.9rem;
+  color: #6C4DF6;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 2px solid #E2E8F0;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-bottom-color: #6C4DF6;
+}
+
+.underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #6C4DF6;
+  transition: all 0.3s ease;
+}
+
+.form-group.focused .underline {
+  width: 100%;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #4A5568;
+}
+
+.remember-me input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #CBD5E0;
+  border-radius: 4px;
+  margin-right: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.remember-me input:checked ~ .checkmark {
+  background-color: #6C4DF6;
+  border-color: #6C4DF6;
+}
+
+.checkmark::after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.remember-me input:checked ~ .checkmark::after {
+  display: block;
+}
+
+.forgot-password {
+  color: #6C4DF6;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: #6C4DF6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn:hover {
+  background-color: #5a3dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 77, 246, 0.3);
+}
+
+.submit-btn.submitting {
+  background-color: #5a3dd9;
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.success-message {
+  margin-top: 1.5rem;
+  padding: 12px;
+  background-color: #F0FFF4;
+  color: #2F855A;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.success-icon {
+  width: 20px;
+  height: 20px;
+  background-color: #48BB78;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.signup-link {
+  margin-top: 2rem;
+  text-align: center;
+  color: #718096;
+}
+
+.signup-link a {
+  color: #6C4DF6;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+  
+  .login-animation {
+    height: 200px;
+  }
+  
+  .login-form {
+    padding: 2rem;
+  }
+  
+  .character {
+    transform: scale(0.8);
+  }
+}
