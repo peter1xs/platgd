@@ -17,8 +17,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-   origin: 'https://platform-phi-two.vercel.app/',
-    credentials: true
+   origin: '*',
 }));
 
 
@@ -27,7 +26,7 @@ app.use(cors({
 
 
 // Database Connection
-mongoose.connect("mongodb+srv://cobotkidsacademy:xURRNuyZtWF2bo9H@cluster0.cuaqfcz.mongodb.net/")
+mongoose.connect("mongodb+srv://cobotkidsacademy:3eJkIfTpBU7ggj1O@cluster0.fhyc2xl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log("MongoDB connected successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
@@ -55,6 +54,86 @@ const classSchema = new mongoose.Schema({
 
 const Class = mongoose.model('Class', classSchema);
 
+app.post('/cobotKidsKenya/classCode', async (req, res) => {
+  try {
+    const { className, classCode } = req.body;
+
+    if (!className || !classCode) {
+      return res.status(400).json({ 
+        error: 'Both class name and code are required' 
+      });
+    }
+
+    const existingClass = await Class.findOne({ classCode });
+    if (existingClass) {
+      return res.status(400).json({ 
+        error: 'This class code is already in use' 
+      });
+    }
+
+    const newClass = new Class({ className, classCode });
+    await newClass.save();
+
+    res.status(201).json({
+      message: 'Class created successfully',
+      class: {
+        className: newClass.className,
+        classCode: newClass.classCode,
+        createdAt: newClass.createdAt
+      }
+    });
+
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).json({ 
+      error: 'Internal server error' 
+    });
+  }
+});
+
+app.post('/cobotKidsKenya/verifyClassCode', async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const code = otp.join('');
+
+    if (!code || code.length !== 4) {
+      return res.status(400).json({ 
+        valid: false,
+        error: 'Invalid code format' 
+      });
+    }
+
+    const existingClass = await Class.findOne({ classCode: code });
+    
+    if (existingClass) {
+      return res.json({
+        valid: true,
+        class: existingClass
+      });
+    } else {
+      return res.json({
+        valid: false,
+        error: 'Invalid class code'
+      });
+    }
+  } catch (err) {
+    console.error('Verification error:', err);
+    res.status(500).json({ 
+      valid: false,
+      error: 'Server error during verification' 
+    });
+  }
+});
+
+app.get('/cobotKidsKenya/classCode', async (req, res) => {
+  try {
+    const classes = await Class.find().sort({ createdAt: -1 });
+    res.json(classes);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 // School Routes
 app.post('/cobotKidsKenya/schools', async (req, res) => {
@@ -64,50 +143,44 @@ app.post('/cobotKidsKenya/schools', async (req, res) => {
     const { name, code, location } = req.body;
 
     // Validate input
-    if (!name || !code) {
+    if (!name || !code || !location) {
+      console.log('Validation failed - missing required fields:', { name, code, location });
       return res.status(400).json({
         success: false,
-        error: 'School name and code are required'
+        error: 'Name, code, and location are required'
       });
     }
 
     // Check if school code already exists
     const existingSchool = await School.findOne({ code: code.toUpperCase() });
     if (existingSchool) {
+      console.log('School code already exists:', code.toUpperCase());
       return res.status(400).json({
         success: false,
         error: 'School code already exists'
       });
     }
 
-    // Create new school with empty classes array
+    // Create new school with proper validation and defaults
     const school = new School({
       name: name.trim(),
       code: code.toUpperCase().trim(),
-      location: location ? location.trim() : '',
-      classes: [] // Explicitly set empty array
+      location: location.trim(),
+      classes: [],
+      studentsCount: 0
     });
 
     console.log('Attempting to save school:', school);
     await school.save();
-
     console.log('School saved successfully:', school._id);
+
     res.status(201).json({
       success: true,
       data: school
     });
 
   } catch (error) {
-    console.error('Error creating school:', error);
-    
-    // Handle specific MongoDB errors
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        error: 'School code already exists'
-      });
-    }
-    
+    console.error("Error creating school:", error);
     res.status(500).json({
       success: false,
       error: 'Server error',
@@ -509,10 +582,10 @@ app.post('/cobotKidsKenya/schools/:schoolId/classes/:classId/students', async (r
     const { fname, lname, username, password } = req.body;
 
     // Validate input
-    if (!fname || !lname) {
+  if (!fname ) {
       return res.status(400).json({ 
         success: false,
-        error: 'First name and last name are required' 
+        error: 'Missing required fields' 
       });
     }
 
@@ -532,83 +605,25 @@ app.post('/cobotKidsKenya/schools/:schoolId/classes/:classId/students', async (r
       });
     }
 
-    // Generate username if not provided
-    let generatedUsername = username;
-    if (!generatedUsername) {
-      generatedUsername = `${school.code.toLowerCase()}-${fname.toLowerCase()}.${lname.toLowerCase()}`;
-    }
+    // Add student with frontend-generated username
+    classObj.students.push({
+      fname,
+      lname,
+      username,
+      password
+    });
 
-    // Check if username already exists in this specific class
-    const existingStudent = classObj.students.find(student => 
-      student.username === generatedUsername.toLowerCase()
-    );
-
-    if (existingStudent) {
-      return res.status(400).json({
-        success: false,
-        error: 'A student with this username already exists in this class'
-      });
-    }
-
-    // Add student with generated username
-    const newStudent = {
-      fname: fname.trim(),
-      lname: lname.trim(),
-      username: generatedUsername.toLowerCase(),
-      password: password || '1234'
-    };
-
-    classObj.students.push(newStudent);
     await school.save();
 
     const addedStudent = classObj.students[classObj.students.length - 1];
-    res.status(201).json({
-      success: true,
-      data: addedStudent
-    });
+    res.status(201).json(addedStudent);
 
   } catch (err) {
     console.error('Server error:', err);
-    
-    // Handle duplicate key error specifically
-    if (err.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        error: 'A student with this username already exists'
-      });
-    }
-    
     res.status(500).json({
       success: false,
-      error: 'Server error',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+      error: 'Server error'
     });
-  }
-});
-
-// DELETE route for removing a student from a class
-app.delete('/cobotKidsKenya/schools/:schoolId/classes/:classId/students/:studentId', async (req, res) => {
-  try {
-    const { schoolId, classId, studentId } = req.params;
-
-    const school = await School.findById(schoolId);
-    if (!school) return res.status(404).json({ success: false, error: 'School not found' });
-    const classObj = school.classes.id(classId);
-    if (!classObj) return res.status(404).json({ success: false, error: 'Class not found' });
-
-    const before = classObj.students.length;
-    classObj.students = classObj.students.filter(s => String(s._id) !== String(studentId));
-    const after = classObj.students.length;
-
-    if (before === after) {
-      return res.status(404).json({ success: false, error: 'Student not found in class' });
-    }
-
-    await school.save();
-    return res.status(200).json({ success: true, message: 'Student removed successfully' });
-  } catch (error) {
-    console.error('Error removing student:', error);
-    return res.status(500).json({ success: false, error: 'Server error while removing student' });
   }
 });
 
@@ -839,9 +854,7 @@ app.put('/cobotKidsKenya/courses/:courseId/exams/:examId', async (req, res) => {
     if (scheduledAt) exam.scheduledAt = new Date(scheduledAt);
     if (assignedBy) exam.assignedBy = assignedBy;
     if (schoolId && classId) exam.assignedTo = [{ school: schoolId, class: classId }];
-    if (status && ['pending', 'draft', 'published', 'active', 'completed', 'archived'].includes(status)) {
-      exam.status = status;
-    }
+    if (status && ['pending', 'published', 'completed'].includes(status)) exam.status = status;
 
     await course.save();
     return res.status(200).json({ success: true, data: exam });
@@ -1507,20 +1520,6 @@ app.post('/cobotKidsKenya/tutors/:tutorId/assign', async (req, res) => {
 
     await tutor.save();
 
-    // Also reflect assignment on the School class record for easier reads
-    try {
-      const school = await School.findById(schoolId);
-      if (school) {
-        const classDoc = school.classes.id(classId);
-        if (classDoc) {
-          classDoc.tutor = tutor._id;
-          await school.save();
-        }
-      }
-    } catch (innerErr) {
-      console.warn('Tutor assigned but failed to mirror on class.tutor:', innerErr?.message || innerErr);
-    }
-
     return res.status(200).json({ success: true, message: 'Tutor assigned successfully' });
   } catch (error) {
     console.error('Error assigning tutor:', error);
@@ -1556,26 +1555,38 @@ app.delete('/cobotKidsKenya/tutors/:tutorId/assignments/:schoolId/classes/:class
 });
 
 
-// Get all classes with their codes and details (without tutor population)
+// Get all classes with their codes and details
 app.get('/cobotKidsKenya/classCodes', async (req, res) => {
   try {
-    const schools = await School.find({});
+    const schools = await School.find({}).populate({
+      path: 'classes.tutor',
+      select: 'fname lname username email'
+    });
     
-    const classData = schools.flatMap(school => 
-      school.classes.map(cls => ({
-        _id: cls._id,
-        name: cls.name,
-        level: cls.level,
-        schoolId: school._id,
-        schoolName: school.name,
-        schoolCode: school.code,
-        courses: cls.courses || [],
-        schedule: cls.schedule || {},
-        classCodes: (cls.classCodes || []).slice(-3),
-        currentClassCode: cls.currentClassCode || null,
-        studentsCount: cls.students ? cls.students.length : 0
-      }))
-    );
+    const classData = [];
+    
+    schools.forEach(school => {
+      school.classes.forEach(cls => {
+        const classInfo = {
+          _id: cls._id,
+          name: cls.name,
+          level: cls.level,
+          schoolId: school._id,
+          schoolName: school.name,
+          schoolCode: school.code,
+          tutor: cls.tutor ? {
+            name: `${cls.tutor.fname} ${cls.tutor.lname}`,
+            username: cls.tutor.username
+          } : null,
+          courses: cls.courses || [],
+          schedule: cls.schedule || {},
+          classCodes: cls.classCodes || [],
+          currentClassCode: cls.currentClassCode || null,
+          studentsCount: cls.students ? cls.students.length : 0
+        };
+        classData.push(classInfo);
+      });
+    });
     
     res.status(200).json({ success: true, data: classData });
   } catch (error) {
@@ -1588,61 +1599,30 @@ app.get('/cobotKidsKenya/classCodes', async (req, res) => {
 app.post('/cobotKidsKenya/schools/:schoolId/classes/:classId/generateCode', async (req, res) => {
   try {
     const { schoolId, classId } = req.params;
-    const { topicId, courseId } = req.body; // optional ties
+    const { generatedBy } = req.body;
     
-    // Validate IDs
     if (!mongoose.Types.ObjectId.isValid(schoolId) || !mongoose.Types.ObjectId.isValid(classId)) {
       return res.status(400).json({ success: false, error: 'Invalid school or class ID' });
     }
     
-    // Validate courseId if provided
-    if (courseId && !mongoose.Types.ObjectId.isValid(courseId)) {
-      return res.status(400).json({ success: false, error: 'Invalid course ID' });
-    }
-    
-    // Find the school and class
     const school = await School.findById(schoolId);
     if (!school) return res.status(404).json({ success: false, error: 'School not found' });
     
     const classDoc = school.classes.id(classId);
     if (!classDoc) return res.status(404).json({ success: false, error: 'Class not found' });
     
-    // If courseId is provided, verify it's assigned to this class
-    if (courseId) {
-      const courseAssigned = classDoc.courses.some(c => c.course.toString() === courseId);
-      if (!courseAssigned) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'This course is not assigned to the specified class' 
-        });
-      }
-    }
-    
-    // Enforce at most 3 active codes
-    const activeCodes = (classDoc.classCodes || []).filter(c => c.status === 'active');
-    if (activeCodes.length >= 3) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Maximum of 3 active codes allowed per class' 
-      });
-    }
-
-    // Generate unique 3-digit code
-    const generateCode = () => Math.floor(100 + Math.random() * 900).toString();
+    // Generate 3-digit code
+    const generateCode = () => {
+      return Math.floor(100 + Math.random() * 900).toString();
+    };
     
     let code;
     let attempts = 0;
-    const maxAttempts = 10;
-    
-    // Ensure code is unique across all classes
     do {
       code = generateCode();
       attempts++;
-      if (attempts > maxAttempts) {
-        return res.status(500).json({ 
-          success: false, 
-          error: 'Unable to generate unique code after multiple attempts' 
-        });
+      if (attempts > 10) {
+        return res.status(500).json({ success: false, error: 'Unable to generate unique code' });
       }
     } while (await School.findOne({ 'classes.classCodes.code': code }));
     
@@ -1653,18 +1633,16 @@ app.post('/cobotKidsKenya/schools/:schoolId/classes/:classId/generateCode', asyn
     // Generate unique lesson ID (date + class ID + random)
     const lessonId = `${now.toISOString().split('T')[0]}-${classId}-${Math.random().toString(36).substr(2, 5)}`;
     
-    // Create the new class code
     const classCode = {
       code,
       status: 'active',
       validFrom: now,
       validUntil,
+      generatedBy: generatedBy || new mongoose.Types.ObjectId(),
       generatedAt: now,
       activatedAt: now,
       lessonDate: now,
-      lessonId,
-      course: courseId || undefined,
-      topicId: topicId || undefined
+      lessonId
     };
     
     // Add the new code to the classCodes array
@@ -1673,38 +1651,16 @@ app.post('/cobotKidsKenya/schools/:schoolId/classes/:classId/generateCode', asyn
     }
     classDoc.classCodes.push(classCode);
     
-    // Update the current class code reference
-    classDoc.currentClassCode = classCode;
-    
-    // Save the school document
     await school.save();
-    
-    // Prepare response data
-    const responseData = {
-      code: classCode.code,
-      status: classCode.status,
-      validUntil: classCode.validUntil,
-      lessonId: classCode.lessonId,
-      courseId: classCode.course || null,
-      topicId: classCode.topicId || null,
-      classId: classDoc._id,
-      className: classDoc.name,
-      schoolId: school._id,
-      schoolName: school.name
-    };
     
     res.status(200).json({ 
       success: true, 
-      data: responseData,
+      data: classCode,
       message: 'Class code generated successfully' 
     });
   } catch (error) {
     console.error('Error generating class code:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Server error while generating class code',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ success: false, error: 'Server error while generating class code' });
   }
 });
 
@@ -1764,35 +1720,18 @@ app.put('/cobotKidsKenya/schools/:schoolId/classes/:classId/classCode/:codeId/st
 app.post('/cobotKidsKenya/expireClassCodes', async (req, res) => {
   try {
     const now = new Date();
-    const schools = await School.find({
-      'classes.classCodes': {
-        $elemMatch: {
-          status: 'active',
-          validUntil: { $lt: now }
-        }
-      }
-    });
+    const schools = await School.find({});
     
     let expiredCount = 0;
     
     for (const school of schools) {
       for (const cls of school.classes) {
-        const expiredCodes = cls.classCodes.filter(
-          code => code.status === 'active' && code.validUntil < now
-        );
-        
-        expiredCodes.forEach(code => {
-          code.status = 'expired';
-          code.deactivatedAt = now;
-        });
-        
         if (cls.currentClassCode && 
             cls.currentClassCode.status === 'active' && 
             cls.currentClassCode.validUntil < now) {
           cls.currentClassCode.status = 'expired';
+          expiredCount++;
         }
-        
-        expiredCount += expiredCodes.length;
       }
       await school.save();
     }
@@ -1809,20 +1748,18 @@ app.post('/cobotKidsKenya/expireClassCodes', async (req, res) => {
 });
 
 // Verify class code for student access
-// Updated verification endpoint in server.js
 app.post('/cobotKidsKenya/verifyClassCode', async (req, res) => {
   try {
-    const { classCode, studentId, courseId } = req.body;
-
-    // Validate required fields
-    if (!classCode || !studentId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Class code and student ID are required'
+    const { classCode, courseId, studentId } = req.body;
+    
+    if (!classCode || !courseId || !studentId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Class code, course ID, and student ID are required' 
       });
     }
 
-    // Find school with matching active class code
+    // Find a school with an active class code matching the provided code
     const school = await School.findOne({
       'classes.classCodes': {
         $elemMatch: {
@@ -1831,681 +1768,73 @@ app.post('/cobotKidsKenya/verifyClassCode', async (req, res) => {
           validUntil: { $gt: new Date() }
         }
       }
-    }).select('name code classes.$');
+    });
 
     if (!school) {
-      return res.status(404).json({
-        success: false,
-        error: 'Invalid or expired class code'
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Invalid or expired class code' 
       });
     }
 
     // Find the specific class with this code
     const classWithCode = school.classes.find(cls => 
-      cls.classCodes?.some(code => 
-        code?.code === classCode && 
-        code?.status === 'active' && 
-        new Date(code?.validUntil) > new Date()
+      cls.classCodes && cls.classCodes.some(code => 
+        code.code === classCode && 
+        code.status === 'active' && 
+        new Date(code.validUntil) > new Date()
       )
     );
 
     if (!classWithCode) {
-      return res.status(404).json({
-        success: false,
-        error: 'Class not found for this code'
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Invalid class code' 
       });
     }
 
-    // Verify student enrollment - with null checks
-    const isStudentEnrolled = classWithCode.students?.some?.(student => 
-      student?._id?.toString() === studentId
+    // Verify the student is in this class
+    const studentInClass = classWithCode.students.find(student => 
+      student._id.toString() === studentId
     );
 
-    if (!isStudentEnrolled) {
-      return res.status(403).json({
-        success: false,
-        error: 'Student not enrolled in this class'
+    if (!studentInClass) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'You are not enrolled in this class' 
       });
     }
 
-    // Verify course assignment if courseId provided
-    if (courseId) {
-      const isCourseValid = classWithCode.courses?.some?.(c => 
-        c?.course?.toString() === courseId
-      );
-      
-      if (!isCourseValid) {
-        return res.status(403).json({
-          success: false,
-          error: 'Course not assigned to this class'
-        });
-      }
-    }
+    // Check if the course is assigned to this class
+    const courseAssigned = classWithCode.courses.find(course => 
+      course.course.toString() === courseId
+    );
 
-    // Find the specific class code object
-    const foundCode = classWithCode.classCodes?.find?.(c => c?.code === classCode);
-    if (!foundCode) {
-      return res.status(404).json({
-        success: false,
-        error: 'Class code details not found'
+    if (!courseAssigned) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'This course is not assigned to your class' 
       });
     }
 
-    res.status(200).json({
-      success: true,
+    res.status(200).json({ 
+      success: true, 
+      message: 'Class code verified successfully',
       data: {
         schoolId: school._id,
         classId: classWithCode._id,
         className: classWithCode.name,
-        schoolName: school.name,
-        validUntil: foundCode.validUntil
-      },
-      message: 'Class code verified successfully'
+        schoolName: school.name
+      }
     });
-
   } catch (error) {
     console.error('Error verifying class code:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Server error while verifying class code',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-// ===== NOTES ROUTES ===== //
-
-// GET all notes for a specific topic
-app.get('/cobotKidsKenya/courses/:courseId/topics/:topicId/notes', async (req, res) => {
-  try {
-    const { courseId, topicId } = req.params;
-
-    // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(topicId)) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Invalid course or topic ID format' 
-      });
-    }
-
-    // Find course and topic
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Course not found' 
-      });
-    }
-
-    const topic = course.topics.id(topicId);
-    if (!topic) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Topic not found' 
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: topic.notes || []
-    });
-  } catch (error) {
-    console.error('Error fetching notes:', error);
     res.status(500).json({ 
-      success: false,
-      error: 'Server error while fetching notes' 
+      success: false, 
+      error: 'Server error while verifying class code' 
     });
   }
 });
-
-// POST - Add a new note to a topic
-app.post('/cobotKidsKenya/courses/:courseId/topics/:topicId/notes', async (req, res) => {
-  try {
-    const { courseId, topicId } = req.params;
-    const { title, description, content, images } = req.body;
-
-    // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(topicId)) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Invalid course or topic ID format' 
-      });
-    }
-
-    // Validate required fields
-    if (!content || typeof content !== 'string' || content.trim().length < 10) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Note content is required and must be at least 10 characters' 
-      });
-    }
-
-    // Find course and topic
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Course not found' 
-      });
-    }
-
-    const topic = course.topics.id(topicId);
-    if (!topic) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Topic not found' 
-      });
-    }
-
-    // Process images - convert strings to image objects if needed
-    let processedImages = [];
-    if (Array.isArray(images)) {
-      processedImages = images
-        .filter(img => img) // Remove empty values
-        .map(img => {
-          // If it's already an object with imageUrl, use it
-          if (typeof img === 'object' && img.imageUrl) {
-            return {
-              imageUrl: img.imageUrl.trim(),
-              caption: img.caption ? img.caption.trim() : undefined
-            };
-          }
-          // If it's a string, convert to image object
-          if (typeof img === 'string') {
-            return {
-              imageUrl: img.trim()
-            };
-          }
-          return null;
-        })
-        .filter(img => img !== null); // Remove any invalid entries
-    }
-
-    // Create new note
-    const newNote = {
-      title: title ? title.trim() : `Note ${topic.notes.length + 1}`,
-      description: description ? description.trim() : '',
-      content: content.trim(),
-      images: processedImages,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    // Add note to topic
-    topic.notes.push(newNote);
-    topic.updatedAt = new Date();
-    course.updatedAt = new Date();
-
-    await course.save();
-
-    // Get the newly added note (Mongoose document)
-    const addedNote = topic.notes[topic.notes.length - 1];
-
-    res.status(201).json({
-      success: true,
-      message: 'Note created successfully',
-      data: addedNote.toObject() // Convert to plain JS object
-    });
-  } catch (error) {
-    console.error('Error creating note:', error);
-    
-    // Handle validation errors specifically
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ 
-        success: false,
-        error: 'Validation failed',
-        details: errors
-      });
-    }
-
-    res.status(500).json({ 
-      success: false,
-      error: 'Server error while creating note',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// PUT - Update a note
-app.put('/cobotKidsKenya/courses/:courseId/topics/:topicId/notes/:noteId', async (req, res) => {
-  try {
-    const { courseId, topicId, noteId } = req.params;
-    const { title, description, content, images } = req.body;
-
-    // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(topicId)) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Invalid course or topic ID format' 
-      });
-    }
-
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Course not found' 
-      });
-    }
-
-    const topic = course.topics.id(topicId);
-    if (!topic) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Topic not found' 
-      });
-    }
-
-    const note = topic.notes.id(noteId);
-    if (!note) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Note not found' 
-      });
-    }
-
-    // Update note
-    if (title !== undefined) note.title = title.trim();
-    if (description !== undefined) note.description = description.trim();
-    if (content !== undefined) note.content = content.trim();
-    if (images !== undefined) note.images = Array.isArray(images) ? images.filter(url => url.trim()) : [];
-
-    await course.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Note updated successfully',
-      data: note
-    });
-  } catch (error) {
-    console.error('Error updating note:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Server error while updating note' 
-    });
-  }
-});
-
-// DELETE - Delete a note
-app.delete('/cobotKidsKenya/courses/:courseId/topics/:topicId/notes/:noteId', async (req, res) => {
-  try {
-    const { courseId, topicId, noteId } = req.params;
-
-    // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(topicId)) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Invalid course or topic ID format' 
-      });
-    }
-
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Course not found' 
-      });
-    }
-
-    const topic = course.topics.id(topicId);
-    if (!topic) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Topic not found' 
-      });
-    }
-
-    const note = topic.notes.id(noteId);
-    if (!note) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Note not found' 
-      });
-    }
-
-    // Remove the note
-    topic.notes.pull(noteId);
-    await course.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Note deleted successfully'
-    });
-  } catch (error) {
-    console.error('Error deleting note:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Server error while deleting note' 
-    });
-  }
-});
-
-// DELETE - Delete a topic
-app.delete('/cobotKidsKenya/courses/:courseId/topics/:topicId', async (req, res) => {
-  try {
-    const { courseId, topicId } = req.params;
-
-    // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(topicId)) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Invalid course or topic ID format' 
-      });
-    }
-
-    const course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Course not found' 
-      });
-    }
-
-    const topic = course.topics.id(topicId);
-    if (!topic) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Topic not found' 
-      });
-    }
-
-    // Remove the topic
-    course.topics.pull(topicId);
-    await course.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Topic deleted successfully'
-    });
-  } catch (error) {
-    console.error('Error deleting topic:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Server error while deleting topic' 
-    });
-  }
-});
-
-// ===== END NOTES ROUTES ===== //
-
-
-// ===== EXAM ROUTES ===== //
-
-// GET - Fetch exam by id (searches across courses)
-app.get('/cobotKidsKenya/exams/:examId', async (req, res) => {
-  try {
-    const { examId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(examId)) {
-      return res.status(400).json({ success: false, error: 'Invalid exam ID format' });
-    }
-
-    const course = await Course.findOne({ 'exams._id': examId });
-    if (!course) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    const exam = course.exams.id(examId);
-    if (!exam) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    return res.status(200).json({ success: true, data: exam });
-  } catch (error) {
-    console.error('Error fetching exam by id:', error);
-    return res.status(500).json({ success: false, error: 'Server error while fetching exam' });
-  }
-});
-
-// GET - Fetch exam by code
-app.get('/cobotKidsKenya/exams/code/:examCode', async (req, res) => {
-  try {
-    const { examCode } = req.params;
-    
-    if (!examCode || examCode.trim() === '') {
-      return res.status(400).json({ success: false, error: 'Exam code is required' });
-    }
-
-    // Search for exam in all courses
-    const course = await Course.findOne({
-      'exams.code': examCode.trim().toUpperCase()
-    });
-
-    if (!course) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    const exam = course.exams.find(e => e.code === examCode.trim().toUpperCase());
-    if (!exam) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    // Check if exam is active
-    const now = new Date();
-    if (exam.scheduledAt && now < exam.scheduledAt) {
-      return res.status(400).json({ success: false, error: 'Exam has not started yet' });
-    }
-
-    if (exam.status !== 'published' && exam.status !== 'active') {
-      return res.status(400).json({ success: false, error: 'Exam is not available' });
-    }
-
-    return res.status(200).json({ success: true, data: exam });
-  } catch (error) {
-    console.error('Error fetching exam by code:', error);
-    return res.status(500).json({ success: false, error: 'Server error while fetching exam' });
-  }
-});
-
-// POST - Register student for exam
-app.post('/cobotKidsKenya/exams/:examId/register', async (req, res) => {
-  try {
-    const { examId } = req.params;
-    const { studentId, examCode } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(examId) || !mongoose.Types.ObjectId.isValid(studentId)) {
-      return res.status(400).json({ success: false, error: 'Invalid exam or student ID format' });
-    }
-
-    // Find the course containing this exam
-    const course = await Course.findOne({
-      'exams._id': examId
-    });
-
-    if (!course) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    const exam = course.exams.id(examId);
-    if (!exam) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    // Check if student is already registered
-    const existingAttempt = exam.attempts.find(
-      attempt => attempt.student.toString() === studentId
-    );
-
-    if (existingAttempt) {
-      return res.status(400).json({ success: false, error: 'Student is already registered for this exam' });
-    }
-
-    // Add student to attempts
-    exam.attempts.push({
-      student: studentId,
-      status: 'registered',
-      registeredAt: new Date()
-    });
-
-    await course.save();
-
-    return res.status(200).json({ success: true, message: 'Student registered successfully for exam' });
-  } catch (error) {
-    console.error('Error registering student for exam:', error);
-    return res.status(500).json({ success: false, error: 'Server error while registering student' });
-  }
-});
-
-// POST - Start exam
-app.post('/cobotKidsKenya/exams/:examId/start', async (req, res) => {
-  try {
-    const { examId } = req.params;
-    const { studentId, startTime } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(examId) || !mongoose.Types.ObjectId.isValid(studentId)) {
-      return res.status(400).json({ success: false, error: 'Invalid exam or student ID format' });
-    }
-
-    // Find the course containing this exam
-    const course = await Course.findOne({
-      'exams._id': examId
-    });
-
-    if (!course) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    const exam = course.exams.id(examId);
-    if (!exam) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    // Find student attempt
-    const attempt = exam.attempts.find(
-      att => att.student.toString() === studentId
-    );
-
-    if (!attempt) {
-      return res.status(404).json({ success: false, error: 'Student not registered for this exam' });
-    }
-
-    if (attempt.status !== 'registered' && attempt.status !== 'in_progress') {
-      return res.status(400).json({ success: false, error: 'Exam already started or completed' });
-    }
-
-    // Update attempt with start time
-    attempt.startedAt = new Date(startTime);
-    attempt.status = 'in_progress';
-
-    await course.save();
-
-    return res.status(200).json({ success: true, message: 'Exam started successfully' });
-  } catch (error) {
-    console.error('Error starting exam:', error);
-    return res.status(500).json({ success: false, error: 'Server error while starting exam' });
-  }
-});
-
-// POST - Submit exam
-app.post('/cobotKidsKenya/exams/:examId/submit', async (req, res) => {
-  try {
-    const { examId } = req.params;
-    const { studentId, answers, timeSpent, submittedAt } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(examId) || !mongoose.Types.ObjectId.isValid(studentId)) {
-      return res.status(400).json({ success: false, error: 'Invalid exam or student ID format' });
-    }
-
-    // Find the course containing this exam
-    const course = await Course.findOne({
-      'exams._id': examId
-    });
-
-    if (!course) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    const exam = course.exams.id(examId);
-    if (!exam) {
-      return res.status(404).json({ success: false, error: 'Exam not found' });
-    }
-
-    // Find student attempt
-    const attempt = exam.attempts.find(
-      att => att.student.toString() === studentId
-    );
-
-    if (!attempt) {
-      return res.status(404).json({ success: false, error: 'Student not registered for this exam' });
-    }
-
-    if (attempt.status === 'submitted' || attempt.status === 'graded') {
-      return res.status(400).json({ success: false, error: 'Exam already submitted' });
-    }
-
-    // Calculate score
-    let totalScore = 0;
-    let totalPoints = 0;
-    const gradedAnswers = [];
-
-    exam.questions.forEach((question, index) => {
-      totalPoints += question.points || 1;
-      const studentAnswer = answers[question._id];
-      let isCorrect = false;
-      let pointsEarned = 0;
-
-      if (studentAnswer) {
-        if (question.type === 'multiple_choice' || question.type === 'true_false') {
-          isCorrect = studentAnswer === question.correctAnswer;
-          pointsEarned = isCorrect ? (question.points || 1) : 0;
-        } else {
-          // For essay and short answer, points will be awarded by instructor
-          pointsEarned = 0;
-        }
-      }
-
-      totalScore += pointsEarned;
-
-      gradedAnswers.push({
-        questionIndex: index,
-        answer: studentAnswer || '',
-        isCorrect,
-        pointsEarned,
-        feedback: ''
-      });
-    });
-
-    const percentage = totalPoints > 0 ? Math.round((totalScore / totalPoints) * 100) : 0;
-    const grade = calculateGrade(percentage);
-
-    // Update attempt
-    attempt.answers = gradedAnswers;
-    attempt.totalScore = totalScore;
-    attempt.percentage = percentage;
-    attempt.grade = grade;
-    attempt.status = 'submitted';
-    attempt.submittedAt = new Date(submittedAt);
-    attempt.timeSpent = timeSpent;
-
-    await course.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Exam submitted successfully',
-      data: {
-        totalScore,
-        totalPoints,
-        percentage,
-        grade,
-        timeSpent
-      }
-    });
-  } catch (error) {
-    console.error('Error submitting exam:', error);
-    return res.status(500).json({ success: false, error: 'Server error while submitting exam' });
-  }
-});
-
-// Helper function to calculate grade
-function calculateGrade(percentage) {
-  if (percentage >= 90) return 'A';
-  if (percentage >= 80) return 'B';
-  if (percentage >= 70) return 'C';
-  if (percentage >= 60) return 'D';
-  return 'F';
-}
-
-// ===== END EXAM ROUTES ===== //
-
 
 // Server Start
 const PORT = 3001;
