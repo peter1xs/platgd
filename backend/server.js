@@ -26,7 +26,7 @@ app.use(cors({
 
 
 // Database Connection
-mongoose.connect("mongodb://localhost/cobotKidsKenya")
+mongoose.connect("process.env.DATABASE")
   .then(() => console.log("MongoDB connected successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
