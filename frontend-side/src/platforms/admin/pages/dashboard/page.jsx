@@ -17,11 +17,11 @@ const Dashboard = () => {
         setLoading(true);
         
         // Fetch schools
-        const schoolsResponse = await fetch('http://localhost:3001/cobotKidsKenya/schools');
+        const schoolsResponse = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/schools');
         const schools = await schoolsResponse.json();
         
         // Fetch courses
-        const coursesResponse = await fetch('http://localhost:3001/cobotKidsKenya/courses');
+        const coursesResponse = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/courses');
         const courses = await coursesResponse.json();
         
         // Calculate stats

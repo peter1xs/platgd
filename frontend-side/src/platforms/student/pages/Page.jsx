@@ -40,7 +40,7 @@ const StudentDashBoard= () => {
     const fetchCourses = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3001/cobotKidsKenya/courses"
+          "https://platform-zl0a.onrender.com/cobotKidsKenya/courses"
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -75,7 +75,7 @@ const StudentDashBoard= () => {
 
     try {
       // Verify class code with backend
-      const response = await fetch(`http://localhost:3001/cobotKidsKenya/verifyClassCode`, {
+      const response = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/verifyClassCode`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const StudentDashBoard= () => {
 
     try {
       // 1) Resolve code to exam
-      const res = await fetch(`http://localhost:3001/cobotKidsKenya/exams/code/${encodeURIComponent(trimmed)}`);
+      const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/exams/code/${encodeURIComponent(trimmed)}`);
       const data = await res.json();
       if (!data.success) {
         setExamJoinError(data.error || "Invalid exam code");
@@ -138,7 +138,7 @@ const StudentDashBoard= () => {
       // Some servers may include attempts; register only if you are not already there
       const alreadyRegistered = Array.isArray(exam.attempts) && exam.attempts.some(a => a.student === studentId);
       if (!alreadyRegistered) {
-        const regRes = await fetch(`http://localhost:3001/cobotKidsKenya/exams/${exam._id}/register`, {
+        const regRes = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/exams/${exam._id}/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ studentId, examCode: trimmed })

@@ -21,7 +21,7 @@ const SchoolsPage = () => {
     const fetchSchools = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:3001/cobotKidsKenya/schools');
+        const response = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/schools');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,7 +60,7 @@ const SchoolsPage = () => {
         throw new Error('School code already exists');
       }
 
-      const response = await fetch('http://localhost:3001/cobotKidsKenya/schools', {
+      const response = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/schools', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const SchoolsPage = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3001/cobotKidsKenya/schools/${id}`, 
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${id}`, 
         { method: 'DELETE' }
       );
 

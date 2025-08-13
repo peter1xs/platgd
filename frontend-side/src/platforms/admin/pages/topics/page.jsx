@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Topics.css';
 
-const API_BASE = 'http://localhost:3001/cobotKidsKenya/courses';
+const API_BASE = 'https://platform-zl0a.onrender.com/cobotKidsKenya/courses';
 
 export default function CourseTopicsPage() {
   const [courses, setCourses] = useState([]);

@@ -14,7 +14,7 @@ const ClassCodesPage = () => {
   const fetchClasses = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/cobotKidsKenya/classCodes');
+      const response = await axios.get('https://platform-zl0a.onrender.com/cobotKidsKenya/classCodes');
       setClasses(response.data.data);
     } catch (err) {
       setError('Failed to fetch classes');
@@ -26,7 +26,7 @@ const ClassCodesPage = () => {
 
   const generateClassCode = async (schoolId, classId) => {
     try {
-      const response = await axios.post(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}/classes/${classId}/generateCode`, {
+      const response = await axios.post(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${classId}/generateCode`, {
         generatedBy: 'admin' // You can replace this with actual admin ID
       });
       
@@ -47,7 +47,7 @@ const ClassCodesPage = () => {
 
   const updateClassCodeStatus = async (schoolId, classId, codeId, status) => {
     try {
-      const response = await axios.put(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}/classes/${classId}/classCode/${codeId}/status`, {
+      const response = await axios.put(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${classId}/classCode/${codeId}/status`, {
         status
       });
       

@@ -19,7 +19,7 @@ const TutorAssignmentsPage = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch('http://localhost:3001/cobotKidsKenya/tutors');
+      const res = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/tutors');
       const result = await res.json();
       if (!res.ok || result.success === false) throw new Error(result.error || 'Failed to fetch tutors');
       setTutors(result.data || []);
@@ -35,7 +35,7 @@ const TutorAssignmentsPage = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch('http://localhost:3001/cobotKidsKenya/schools');
+      const res = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/schools');
       if (!res.ok) throw new Error('Failed to fetch schools');
       const data = await res.json();
       setSchools(data || []);
@@ -52,7 +52,7 @@ const TutorAssignmentsPage = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch(`http://localhost:3001/cobotKidsKenya/tutors/${tutorId}/assignments`);
+      const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutorId}/assignments`);
       const result = await res.json();
       if (!res.ok || result.success === false) throw new Error(result.error || 'Failed to fetch assignments');
       setAssignments(result.data || []);
@@ -77,7 +77,7 @@ const TutorAssignmentsPage = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch(`http://localhost:3001/cobotKidsKenya/tutors/${selectedTutor}/assign`, {
+      const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${selectedTutor}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ schoolId: selectedSchool, classId: selectedClass })
@@ -97,7 +97,7 @@ const TutorAssignmentsPage = () => {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch(`http://localhost:3001/cobotKidsKenya/tutors/${selectedTutor}/assignments/${schoolId}/classes/${classId}`, {
+      const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${selectedTutor}/assignments/${schoolId}/classes/${classId}`, {
         method: 'DELETE'
       });
       const result = await res.json();

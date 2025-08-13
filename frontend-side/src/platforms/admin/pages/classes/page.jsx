@@ -30,7 +30,7 @@ const ClassesPage = () => {
         setError(null);
         
         // Single API call to get school with embedded classes
-        const response = await fetch(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}`);
+        const response = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}`);
         
         if (!response.ok) {
           const errorData = await response.json();
@@ -54,7 +54,7 @@ const ClassesPage = () => {
   useEffect(() => {
     const loadCourses = async () => {
       try {
-        const res = await fetch('http://localhost:3001/cobotKidsKenya/courses');
+        const res = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/courses');
         if (!res.ok) return;
         const data = await res.json();
         setCourses(Array.isArray(data) ? data : []);
@@ -69,7 +69,7 @@ const handleAddClass = async (e) => {
   
   try {
     const response = await axios.post(
-      `http://localhost:3001/cobotKidsKenya/schools/${schoolId}/classes`,
+      `https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes`,
       {
         name: newClass.name.trim(),
         level: newClass.level
@@ -125,7 +125,7 @@ const handleAddClass = async (e) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3001/cobotKidsKenya/schools/${schoolId}/classes/${classId}`,
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${classId}`,
         { method: 'DELETE' }
       );
 
@@ -135,7 +135,7 @@ const handleAddClass = async (e) => {
       }
 
       // Refresh the classes list
-      const updatedResponse = await fetch(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}`);
+      const updatedResponse = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}`);
       const updatedSchool = await updatedResponse.json();
       setClasses(updatedSchool.classes || []);
     } catch (err) {
@@ -349,14 +349,14 @@ const handleAddClass = async (e) => {
               e.preventDefault();
               try {
                 setLoading(true);
-                const res = await fetch(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}/classes/${scheduleModal.classId}/schedule`, {
+                const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${scheduleModal.classId}/schedule`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ dayOfWeek: scheduleModal.dayOfWeek, startTime: scheduleModal.startTime, endTime: scheduleModal.endTime })
                 });
                 if (!res.ok) throw new Error('Failed to set schedule');
                 // refresh school
-                const updatedResponse = await fetch(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}`);
+                const updatedResponse = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}`);
                 const updatedSchool = await updatedResponse.json();
                 setClasses(updatedSchool.classes || []);
                 setScheduleModal({ open: false, classId: null, dayOfWeek: '', startTime: '', endTime: '' });
@@ -403,13 +403,13 @@ const handleAddClass = async (e) => {
               e.preventDefault();
               try {
                 setLoading(true);
-                const res = await fetch(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}/classes/${courseModal.classId}/courses`, {
+                const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${courseModal.classId}/courses`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ courseId: courseModal.courseId, status: courseModal.status })
                 });
                 if (!res.ok) throw new Error('Failed to assign course');
-                const updatedResponse = await fetch(`http://localhost:3001/cobotKidsKenya/schools/${schoolId}`);
+                const updatedResponse = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}`);
                 const updatedSchool = await updatedResponse.json();
                 setClasses(updatedSchool.classes || []);
                 setCourseModal({ open: false, classId: null, courseId: '', status: 'enrolled' });

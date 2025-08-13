@@ -22,7 +22,7 @@ const StudentManagement = () => {
   useEffect(() => {
     const fetchSchools = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/cobotKidsKenya/schools');
+        const response = await axios.get('https://platform-zl0a.onrender.com/cobotKidsKenya/schools');
         setSchools(response.data);
       } catch (error) {
         console.error('Error fetching schools:', error);
@@ -72,7 +72,7 @@ const handleAddStudent = async (e) => {
 
     // 4. Send request
     const response = await axios.post(
-      `http://localhost:3001/api/cobotKidsKenya/schools/${selectedSchool}/classes/${selectedClass}/students`,
+      `https://platform-zl0a.onrender.com/api/cobotKidsKenya/schools/${selectedSchool}/classes/${selectedClass}/students`,
       studentData, // Send complete data
       {
         headers: {

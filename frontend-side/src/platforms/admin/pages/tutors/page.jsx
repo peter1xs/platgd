@@ -27,7 +27,7 @@ const TutorsPage = () => {
   useEffect(() => {
     const fetchTutors = async () => {
       try {
-        const response = await fetch('http://localhost:3001/cobotKidsKenya/tutors');
+        const response = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/tutors');
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,7 +60,7 @@ const TutorsPage = () => {
     setLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3001/cobotKidsKenya/tutors', {
+      const response = await fetch('https://platform-zl0a.onrender.com/cobotKidsKenya/tutors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ const TutorsPage = () => {
     setLoading(true);
     
     try {
-      const response = await fetch(`http://localhost:3001/cobotKidsKenya/tutors/${editingTutor._id}`, {
+      const response = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${editingTutor._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ const TutorsPage = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3001/cobotKidsKenya/tutors/${id}`, 
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${id}`, 
         { method: 'DELETE' }
       );
 
@@ -155,7 +155,7 @@ const TutorsPage = () => {
     setAssignmentsError('');
     setAssignmentsLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/cobotKidsKenya/tutors/${tutor._id}/assignments`);
+      const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutor._id}/assignments`);
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Failed to load assignments');
       setAssignments(Array.isArray(data.data) ? data.data : []);

@@ -22,7 +22,7 @@ const CourseDetail = () => {
         
         // Fetch course details with embedded topics
         const response = await axios.get(
-          `http://localhost:3001/cobotKidsKenya/courses/${courseId}`
+          `https://platform-zl0a.onrender.com/cobotKidsKenya/courses/${courseId}`
         );
         
         const courseData = response.data;

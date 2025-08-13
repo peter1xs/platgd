@@ -27,7 +27,7 @@ const StudentManagement = () => {
     const init = async () => {
       try {
         if (paramSchoolId && paramClassId) {
-          const res = await axios.get(`http://localhost:3001/cobotKidsKenya/schools/${paramSchoolId}`);
+          const res = await axios.get(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${paramSchoolId}`);
           const school = res.data;
           setCurrentSchool(school);
           setSelectedSchool(paramSchoolId);
@@ -36,7 +36,7 @@ const StudentManagement = () => {
           setSelectedClass(paramClassId);
           setStudents(cls?.students || []);
         } else {
-          const response = await axios.get('http://localhost:3001/cobotKidsKenya/schools');
+          const response = await axios.get('https://platform-zl0a.onrender.com/cobotKidsKenya/schools');
           setSchools(response.data);
         }
       } catch (error) {
@@ -88,7 +88,7 @@ const StudentManagement = () => {
     
     try {
       const response = await axios.post(
-        `http://localhost:3001/cobotKidsKenya/schools/${selectedSchool}/classes/${selectedClass}/students`,
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${selectedSchool}/classes/${selectedClass}/students`,
         {
           fname: formData.fname.trim(),
           lname: formData.lname.trim(),
@@ -131,7 +131,7 @@ const StudentManagement = () => {
 
     try {
       await axios.delete(
-        `http://localhost:3001/cobotKidsKenya/schools/${selectedSchool}/classes/${selectedClass}/students/${studentId}`
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${selectedSchool}/classes/${selectedClass}/students/${studentId}`
       );
       
       setStudents(prev => prev.filter(student => student._id !== studentId));
