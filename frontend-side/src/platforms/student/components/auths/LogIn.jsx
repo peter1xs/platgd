@@ -80,7 +80,7 @@ function LogIn() {
   setError('');
 
   try {
-    const response = await axios.post('http://localhost:3001/cobotKidsKenya/students/login', {
+    const response = await axios.post('https://platform-zl0a.onrender.com/cobotKidsKenya/students/login', {
       userName,
       password
     });

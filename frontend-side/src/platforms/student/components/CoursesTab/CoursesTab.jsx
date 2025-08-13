@@ -71,8 +71,8 @@ function StudentsProfile() {
         if (!studentId) throw new Error("No student ID found");
 
         const [studentRes, coursesRes] = await Promise.all([
-          axios.get(`http://localhost:3001/cobotKidsKenya/students/${studentId}`),
-          axios.get(`http://localhost:3001/cobotKidsKenya/students/${studentId}/courses`)
+          axios.get(`https://platform-zl0a.onrender.com/cobotKidsKenya/students/${studentId}`),
+          axios.get(`https://platform-zl0a.onrender.com/cobotKidsKenya/students/${studentId}/courses`)
         ]);
 
         if (!studentRes.data.success || !coursesRes.data.success) {

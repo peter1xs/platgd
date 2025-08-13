@@ -22,7 +22,7 @@ function StudentProfile() {
 
         // Fetch student data
         const studentResponse = await axios.get(
-          `http://localhost:3001/cobotKidsKenya/students/${studentId}`
+          `https://platform-zl0a.onrender.com/cobotKidsKenya/students/${studentId}`
         );
 
         if (!studentResponse.data.success) {
@@ -33,7 +33,7 @@ function StudentProfile() {
 
         // Fetch all courses from the database
         const coursesResponse = await axios.get(
-          `http://localhost:3001/cobotKidsKenya/courses`
+          `https://platform-zl0a.onrender.com/cobotKidsKenya/courses`
         );
 
         if (coursesResponse.data.success) {
