@@ -35,7 +35,7 @@ const ExamRoom = () => {
           setIsLoading(false);
           return;
         }
-        const response = await fetch(`http://localhost:3001/cobotKidsKenya/exams/${examId}`);
+        const response = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/exams/${examId}`);
         const data = await response.json();
 
         if (data.success) {
@@ -86,7 +86,7 @@ const ExamRoom = () => {
     try {
       // Register exam start
       const examId = getExamId();
-      const response = await fetch(`http://localhost:3001/cobotKidsKenya/exams/${examId}/start`, {
+      const response = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/exams/${examId}/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ const ExamRoom = () => {
 
       // Submit exam answers
       const examId = getExamId();
-      const response = await fetch(`http://localhost:3001/cobotKidsKenya/exams/${examId}/submit`, {
+      const response = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/exams/${examId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

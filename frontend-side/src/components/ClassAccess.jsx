@@ -21,7 +21,7 @@ const ClassAccess = () => {
     }
 
     axios
-      .post("http://localhost:3001/cobotKidsKenya/verifyClassCode", { otp })
+      .post("https://platform-zl0a.onrender.com/cobotKidsKenya/verifyClassCode", { otp })
       .then((response) => {
         if (response.data.valid) {
           // Successful verification
