@@ -25,7 +25,7 @@ import {
   faSchool,
   faChalkboardTeacher
 } from '@fortawesome/free-solid-svg-icons';
-import './styles/TutorDashboard.css';
+import './/TutorDashboard.css';
 
 function TutorDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');  
