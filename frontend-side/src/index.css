@@ -12,15 +12,15 @@ html {
     scroll-behavior: smooth;
 }
 
-:root {
-    --primary: #007BFF;
-    --secondary: #0055CC;
-   --accent: #FF6600;
+:root{
+     --primary: #001BB7;
+    --secondary: #0046FF;
+    --accent: #FF6600;
      --secondaryAccent: #E65C00;
-    --dark: #1A1A2E;
-    --light: #F5F5FF;
+    --text-light: #6b7280;
+    --bg-light: #E9E9E9;
+    --white-bg: white;
 }
-
 a {
     text-decoration: none;
 }

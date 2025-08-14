@@ -183,12 +183,12 @@ const StudentDashBoard= () => {
        <StudentProfile />
 
       {/* Main Content */}
-      <div className="student-dashboard-content">
+      <div className="student-student-navigation">
         {/* Sidebar */}
-       <aside className="student-sidebar">
+       <aside className="student-navigation-sidebar">
           <nav>
             <button
-              className={`student-sidebar-btn ${
+              className={`student-navigation-btn ${
                 activeTab === "courses" ? "active" : ""
               }`}
               onClick={() => setActiveTab("courses")}
@@ -198,7 +198,7 @@ const StudentDashBoard= () => {
             </button>
 
             <button
-              className={`student-sidebar-btn ${
+              className={`student-navigation-btn ${
                 activeTab === "challenges" ? "active" : ""
               }`}
               onClick={() => setActiveTab("challenges")}
@@ -208,7 +208,7 @@ const StudentDashBoard= () => {
             </button>
 
             <button
-              className={`student-sidebar-btn ${
+              className={`student-navigation-btn ${
                 activeTab === "performance" ? "active" : ""
               }`}
               onClick={() => setActiveTab("performance")}
@@ -218,7 +218,7 @@ const StudentDashBoard= () => {
             </button>
 
             <button
-              className="exam-room-btn"
+              className="student-exam-room-btn"
               onClick={() => setShowExamModal(true)}
             >
               <span className="icon"><i class="fa-solid fa-door-open"></i></span>
@@ -231,15 +231,15 @@ const StudentDashBoard= () => {
         <main className="main-panel">
           {/* Courses Tab */}
           {activeTab === "courses" && (
-            <div className="courses-grid">
+            <div className="student-courses-grid">
               <h2 className="student-courses-title">
                 <span class="typing-effect">My Courses</span>
               </h2>
-              <div className="courses-list">
+              <div className="student-courses">
                 {courses.map((course) => (
                   <div
                     key={course._id || course.id}
-                    className="animated-course-card"
+                    className="student-animated-course-card"
                     onClick={() => handleCourseClick(course)}
                   >
                     <div className="card-image-box">
@@ -248,7 +248,7 @@ const StudentDashBoard= () => {
                         alt={course.courseName}
                         className="card-image"
                       />
-                      <div
+                      <div  
                         className="card-progress"
                         style={{
                           width:
@@ -263,11 +263,11 @@ const StudentDashBoard= () => {
                     <h3 className="card-title">{course.courseName}</h3>
                     <div className="card-badges">
                       <span
-                        className={`badge status ${course.status.toLowerCase()}`}
+                        className={`student-badge status ${course.status.toLowerCase()}`}
                       >
                         {course.status}
                       </span>
-                      <span className="badge code"> {course.code}</span>
+                      <span className="student-badge code"> {course.code}</span>
                     </div>
                   </div>
                 ))}

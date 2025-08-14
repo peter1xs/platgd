@@ -12,7 +12,7 @@ function StudentProfile() {
     completed: 0,
     inProgress: 0,
     certificates: 0
-  });
+  }); 
 
   useEffect(() => {
     const fetchStudentAndCourseData = async () => {
@@ -103,9 +103,9 @@ function StudentProfile() {
         </div>
 
         <div className="student-profile-info-text">
-          <h1 className="student-profile-name">
+          <h4 className="student-profile-name">
             {studentData.fname} {studentData.lname}
-          </h1>
+          </h4>
           <h5 className="student-profile-grade">
             {studentData.className || "Class Not Available"}
           </h5>

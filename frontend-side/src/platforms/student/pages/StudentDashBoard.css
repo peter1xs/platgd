@@ -1,16 +1,29 @@
-.student-dashboard-content {
+:root{
+     --primary: #001BB7;
+    --secondary: #0046FF;
+    --accent: #FF6600;
+     --secondaryAccent: #E65C00;
+    --text-light: #6b7280;
+    --bg-light: #E9E9E9;
+    --white-bg: white;
+}
+
+
+
+
+.student-student-navigation {
   display: flex;
   flex: 1;
 }
 
-.student-sidebar {
+.student-navigation-sidebar {
   width: 350px;
-  background-color: white;
+  background-color: var(--bg-light) ;
   padding: 1.5rem;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
 }
 
-.student-sidebar-btn {
+.student-navigation-btn {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -23,27 +36,27 @@
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.3s;
-  color: #4a5568;
+  color: var(--secondary);
 }
 
-.student-sidebar-btn:hover {
+.student-navigation-btn:hover {
   background-color: #edf2f7;
 }
 
-.student-sidebar-btn.active {
+.student-navigation-btn.active {
   background-color: #ebf4ff;
-  color: #6c4df6;
+  color: var(--secondaryAccent);
   font-weight: bold;
 }
 
-.student-sidebar-btn .icon {
+.student-navigation-btn .icon {
   font-size: 2.5rem;
 }
 
-.student-sidebar-btn .icon-name {
+.student-navigation-btn .icon-name {
   font-size: 1.5rem;
 }
-.exam-room-btn {
+.student-exam-room-btn {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -52,7 +65,7 @@
   padding: 0.8rem 1rem;
   margin-top: 2rem;
   border: none;
-  background-color: #6c4df6;
+  background-color: var(--secondary);
   color: white;
   text-align: left;
   cursor: pointer;
@@ -61,14 +74,10 @@
   font-weight: bold;
 }
 
-.exam-room-btn:hover {
-  background-color: #5a3dd9;
+.student-exam-room-btn:hover {
+  background-color: var(--accent);
 }
 
-.main-panel {
-  flex: 1;
-  padding: 2rem;
-}
 
 /* Courses Section */
 .typing-effect {
@@ -101,17 +110,33 @@
   }
 }
 
-.courses-list {
+.student-courses {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  /* gap: 4rem; */
-  margin-top: 1.5rem;
+  grid-template-columns: repeat(4, 1fr); /* Always 3 columns */
+  /* margin-top: 1.5rem; */
+  gap: 1rem;
+  height: 400px;
+  overflow: scroll;
+  scrollbar-width: none;
 }
 
-.animated-course-card {
+/* For responsive adjustments */
+@media (max-width: 1024px) {
+  .student-courses {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+  }
+}
+
+@media (max-width: 640px) {
+  .student-courses {
+    grid-template-columns: 1fr; /* 1 column on small screens */
+  }
+}
+
+.student-animated-course-card {
   background: linear-gradient(145deg, #ffffff, #f0f0f3);
   border-radius: 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px var(--accent);
   width: 350px;
   padding: 16px;
   transition: all 0.3s ease-in-out;
@@ -121,9 +146,9 @@
   animation: wiggle 5s infinite;
 }
 
-.animated-course-card:hover {
+.student-ianimated-course-card:hover {
   transform: scale(1.03);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 15px 35px --accent
 }
 
 .card-image-box {
@@ -146,7 +171,7 @@
   bottom: 0;
   left: 0;
   height: 8px;
-  background: linear-gradient(to right, #00c853, #b2ff59);
+  background: linear-gradient(to right, #001BB7, #0046FF);
   transition: width 0.5s ease;
   border-radius: 0 0 16px 16px;
 }
@@ -154,7 +179,7 @@
 .card-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #222;
+  color: var(--primary);
   margin: 14px 0 10px;
   text-align: center;
   font-family: "Poppins", sans-serif;
@@ -166,7 +191,7 @@
   flex-wrap: wrap;
 }
 
-.badge {
+.student-badge {
   font-size: 0.75rem;
   font-weight: bold;
   padding: 6px 14px;
@@ -177,23 +202,23 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.badge.status.locked {
-  background: #620274;
+.student-badge.status.locked {
+  background: var(--accent);
   animation: glow 1.5s infinite alternate;
   padding-top: 1rem;
   color: white;
 }
 
-.badge.status.enrolled {
+.student-badge.status.enrolled {
   background: #00b0ff;
 }
 
-.badge.status.completed {
+.student-badge.status.completed {
   background: #00e676;
 }
 
-.badge.code {
-  background: #7c4dff;
+.student-badge.code {
+  background: var(--secondary);
 }
 
 @keyframes glow {
@@ -204,6 +229,33 @@
     box-shadow: 0 0 20px #d500f9;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Challenges Section */
 .challenges-list {
