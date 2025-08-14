@@ -288,161 +288,161 @@ function TutorDashboard() {
       </div>
     </div>
   );
-  const renderStudents = () => (
-    <div className="students-management">
-      <h1>Student Management</h1>
+  // const renderStudents = () => (
+  //   <div className="students-management">
+  //     <h1>Student Management</h1>
       
-      <div className="filters-section">
-        <div className="filter-row">
-          <select 
-            value={selectedSchoolId} 
-            onChange={(e) => {
-              setSelectedSchoolId(e.target.value);
-              setSelectedClassId('');
-            }}
-            className="filter-select"
-          >
-            <option value="">All Schools</option>
-            {schoolsList.map(school => (
-              <option key={school.id} value={school.id}>{school.name}</option>
-            ))}
-          </select>
+  //     <div className="filters-section">
+  //       <div className="filter-row">
+  //         <select 
+  //           value={selectedSchoolId} 
+  //           onChange={(e) => {
+  //             setSelectedSchoolId(e.target.value);
+  //             setSelectedClassId('');
+  //           }}
+  //           className="filter-select"
+  //         >
+  //           <option value="">All Schools</option>
+  //           {schoolsList.map(school => (
+  //             <option key={school.id} value={school.id}>{school.name}</option>
+  //           ))}
+  //         </select>
           
-          <select 
-            value={selectedClassId} 
-            onChange={(e) => setSelectedClassId(e.target.value)}
-            className="filter-select"
-            disabled={!selectedSchoolId}
-          >
-            <option value="">All Classes</option>
-            {classesList
-              .filter(cls => !selectedSchoolId || cls.schoolId === selectedSchoolId)
-              .map(cls => (
-                <option key={cls.id} value={cls.id}>{cls.name}</option>
-              ))}
-          </select>
+  //         <select 
+  //           value={selectedClassId} 
+  //           onChange={(e) => setSelectedClassId(e.target.value)}
+  //           className="filter-select"
+  //           disabled={!selectedSchoolId}
+  //         >
+  //           <option value="">All Classes</option>
+  //           {classesList
+  //             .filter(cls => !selectedSchoolId || cls.schoolId === selectedSchoolId)
+  //             .map(cls => (
+  //               <option key={cls.id} value={cls.id}>{cls.name}</option>
+  //             ))}
+  //         </select>
           
-          <div className="search-box">
-            <FontAwesomeIcon icon={faSearch} />
-            <input
-              type="text"
-              placeholder="Search by name or username"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
+  //         <div className="search-box">
+  //           <FontAwesomeIcon icon={faSearch} />
+  //           <input
+  //             type="text"
+  //             placeholder="Search by name or username"
+  //             value={searchQuery}
+  //             onChange={(e) => setSearchQuery(e.target.value)}
+  //           />
+  //         </div>
+  //       </div>
         
-        <div className="filter-row">
-          <select 
-            value={performanceFilter} 
-            onChange={(e) => setPerformanceFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Performances</option>
-            <option value="Below Expectation">Below Expectation</option>
-            <option value="Meets Expectation">Meets Expectation</option>
-            <option value="Exceeds Expectation">Exceeds Expectation</option>
-          </select>
+  //       <div className="filter-row">
+  //         <select 
+  //           value={performanceFilter} 
+  //           onChange={(e) => setPerformanceFilter(e.target.value)}
+  //           className="filter-select"
+  //         >
+  //           <option value="all">All Performances</option>
+  //           <option value="Below Expectation">Below Expectation</option>
+  //           <option value="Meets Expectation">Meets Expectation</option>
+  //           <option value="Exceeds Expectation">Exceeds Expectation</option>
+  //         </select>
           
-          <select 
-            value={sortBy} 
-            onChange={(e) => setSortBy(e.target.value)}
-            className="filter-select"
-          >
-            <option value="name">Name</option>
-            <option value="performance">Performance</option>
-            <option value="lastLogin">Last Login</option>
-          </select>
+  //         <select 
+  //           value={sortBy} 
+  //           onChange={(e) => setSortBy(e.target.value)}
+  //           className="filter-select"
+  //         >
+  //           <option value="name">Name</option>
+  //           <option value="performance">Performance</option>
+  //           <option value="lastLogin">Last Login</option>
+  //         </select>
           
-          <select 
-            value={sortOrder} 
-            onChange={(e) => setSortOrder(e.target.value)}
-            className="filter-select"
-          >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
+  //         <select 
+  //           value={sortOrder} 
+  //           onChange={(e) => setSortOrder(e.target.value)}
+  //           className="filter-select"
+  //         >
+  //           <option value="asc">Ascending</option>
+  //           <option value="desc">Descending</option>
+  //         </select>
           
-          <button className="reset-btn" onClick={resetFilters}>
-            <FontAwesomeIcon icon={faUndo} />
-            Reset
-          </button>
-        </div>
-      </div>
+  //         <button className="reset-btn" onClick={resetFilters}>
+  //           <FontAwesomeIcon icon={faUndo} />
+  //           Reset
+  //         </button>
+  //       </div>
+  //     </div>
 
-      {loadingStudents ? (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading students...</p>
-        </div>
-      ) : errorStudents ? (
-        <div className="error-message">
-          {errorStudents}
-        </div>
-      ) : (
-        <div className="students-table">
-          {sortedStudents.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Gender</th>
-                  <th>Username</th>
-                  <th>School</th>
-                  <th>Class</th>
-                  <th>Performance Rating</th>
-                  <th>Last login</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedStudents.map(student => (
-                  <tr key={student.id}>
-                    <td>
-                      <Link to={`/schools/${student.schoolId}/classes/${student.classId}/students/${student.id}`} className="student-name">
-                        {student.name}
-                      </Link>
-                    </td>
-                    <td>{student.gender}</td>
-                    <td>{student.username}</td>
-                    <td>{student.schoolName}</td>
-                    <td>{student.className}</td>
-                    <td>
-                      <span className={`performance-badge ${student.performance.toLowerCase().replace(' ', '-')}`}>
-                        <FontAwesomeIcon icon={faStar} />
-                        {student.performance}
-                      </span>
-                    </td>
-                    <td>{student.lastLogin ? new Date(student.lastLogin).toLocaleString() : 'Never'}</td>
-                    <td>
-                      <div className="action-buttons">
-                        <button 
-                          className="action-btn reset-password-btn"
-                          onClick={() => handleResetPassword(student.id)}
-                          title="Reset Password"
-                        >
-                          <FontAwesomeIcon icon={faKey} />
-                        </button>
-                        <button className="action-btn more-btn">
-                          <FontAwesomeIcon icon={faEllipsisV} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="empty-state">
-              <FontAwesomeIcon icon={faExclamationCircle} />
-              <p>No students found matching your criteria</p>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  //     {loadingStudents ? (
+  //       <div className="loading-container">
+  //         <div className="loading-spinner"></div>
+  //         <p>Loading students...</p>
+  //       </div>
+  //     ) : errorStudents ? (
+  //       <div className="error-message">
+  //         {errorStudents}
+  //       </div>
+  //     ) : (
+  //       <div className="students-table">
+  //         {sortedStudents.length > 0 ? (
+  //           <table>
+  //             <thead>
+  //               <tr>
+  //                 <th>Name</th>
+  //                 <th>Gender</th>
+  //                 <th>Username</th>
+  //                 <th>School</th>
+  //                 <th>Class</th>
+  //                 <th>Performance Rating</th>
+  //                 <th>Last login</th>
+  //                 <th>Actions</th>
+  //               </tr>
+  //             </thead>
+  //             <tbody>
+  //               {sortedStudents.map(student => (
+  //                 <tr key={student.id}>
+  //                   <td>
+  //                     <Link to={`/schools/${student.schoolId}/classes/${student.classId}/students/${student.id}`} className="student-name">
+  //                       {student.name}
+  //                     </Link>
+  //                   </td>
+  //                   <td>{student.gender}</td>
+  //                   <td>{student.username}</td>
+  //                   <td>{student.schoolName}</td>
+  //                   <td>{student.className}</td>
+  //                   <td>
+  //                     <span className={`performance-badge ${student.performance.toLowerCase().replace(' ', '-')}`}>
+  //                       <FontAwesomeIcon icon={faStar} />
+  //                       {student.performance}
+  //                     </span>
+  //                   </td>
+  //                   <td>{student.lastLogin ? new Date(student.lastLogin).toLocaleString() : 'Never'}</td>
+  //                   <td>
+  //                     <div className="action-buttons">
+  //                       <button 
+  //                         className="action-btn reset-password-btn"
+  //                         onClick={() => handleResetPassword(student.id)}
+  //                         title="Reset Password"
+  //                       >
+  //                         <FontAwesomeIcon icon={faKey} />
+  //                       </button>
+  //                       <button className="action-btn more-btn">
+  //                         <FontAwesomeIcon icon={faEllipsisV} />
+  //                       </button>
+  //                     </div>
+  //                   </td>
+  //                 </tr>
+  //               ))}
+  //             </tbody>
+  //           </table>
+  //         ) : (
+  //           <div className="empty-state">
+  //             <FontAwesomeIcon icon={faExclamationCircle} />
+  //             <p>No students found matching your criteria</p>
+  //           </div>
+  //         )}
+  //       </div>
+  //     )}
+  //   </div>
+  // );
 
   const renderSchools = () => (
     <div className="schools-management">
