@@ -1,11 +1,22 @@
+:root{
+     --primary: #001BB7;
+    --secondary: #0046FF;
+    --accent: #FF6600;
+     --secondaryAccent: #E65C00;
+    --text-light: #6b7280;
+    --bg-light: #E9E9E9;
+    --white-bg: white;
+}
+
+
+
 .course-detail-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #E65C00 0%, #0046FF 100%);
   padding: 20px;
 }
 
 .course-detail-content {
-  max-width: 1200px;
   margin: 0 auto;
   background: white;
   border-radius: 15px;
@@ -19,7 +30,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #E65C00 0%, #E65C00 100%);
   color: white;
 }
 
@@ -49,9 +60,9 @@
   opacity: 0.9;
 }
 
-.back-btn {
+.course-header-back-btn {
   padding: 12px 24px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--secondary);
   border: 2px solid rgba(255, 255, 255, 0.3);
   color: white;
   border-radius: 8px;
@@ -60,46 +71,12 @@
   transition: all 0.3s ease;
 }
 
-.back-btn:hover {
+.course-header-back-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
 }
 
-/* Navigation Tabs */
-.course-tabs {
-  display: flex;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-}
 
-.tab-btn {
-  flex: 1;
-  padding: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #6c757d;
-  transition: all 0.3s ease;
-  border-bottom: 3px solid transparent;
-}
-
-.tab-btn:hover:not(:disabled) {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.tab-btn.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
-  background: white;
-}
-
-.tab-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 /* Content Area */
 .course-content {
@@ -118,7 +95,7 @@
 .topics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
+  gap: 5px;
 }
 
 .topic-card {
@@ -433,4 +410,603 @@
   border-radius: 5px;
   margin: 20px 0;
   border-left: 4px solid #f5c6cb;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+:root {
+    --color1: #FF6B6B;
+    /* Red */
+    --color2: #4ECDC4;
+    /* Teal */
+    --color3: #FFE66D;
+    /* Yellow */
+    --color4: #7DCEA0;
+    /* Green */
+    --color5: #FFA5A5;
+    /* Pink */
+    --color6: #A5D8FF;
+    /* Blue */
+    --text-dark: #2D3436;
+    --text-light: #F7F1E3;
+}
+
+
+
+/* Add this to your existing CSS */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    /* Ensures header stays above other content */
+    display: flex;
+    justify-content: space-between;
+    background: linear-gradient(135deg, var(--color1), var(--color5));
+    padding: 1rem 4rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-bottom: 5px dashed var(--color3);
+}
+
+.notes-header .notes-header-container {
+    margin: 1rem;
+}
+
+/* The rest of your existing header styles remain the same */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--color2);
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s;
+    gap: 1rem;
+    height: 50px;
+}
+
+.back-btn:hover {
+    transform: scale(1.05);
+    background-color: var(--color4);
+}
+
+.back-btn i {
+    margin-right: 8px;
+}
+
+.notes-header h1 {
+    font-family: 'Fredoka One', cursive;
+    margin: 0.5rem 0;
+    color: white;
+    font-size: 2.5rem;
+    text-shadow: 3px 3px 0 var(--color2);
+    letter-spacing: 1px;
+}
+
+.topic-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.difficulty-level {
+    height: 50px;
+    padding: 1rem 4rem;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    border-radius: 50px;
+    font-weight: 700;
+    background-color: white;
+    color: var(--color1);
+    box-shadow: 0 3px 0 var(--color1);
+}
+
+.duration-estimate {
+    display: flex;
+    align-items: center;
+    color: white;
+    font-weight: 700;
+}
+
+.duration-estimate i {
+    margin-right: 8px;
+}
+
+/* Main Content */
+.notes-container {
+    display: flex;
+    gap: 2rem;
+    margin: 2rem auto;
+}
+
+/* Sidebar */
+.notes-sidebar {
+    width: 250px;
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+}
+
+.sidebar-section {
+    background-color: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 6px 0 var(--color6);
+    border: 3px solid var(--color6);
+}
+
+.sidebar-section h3 {
+    font-family: 'Fredoka One', cursive;
+    margin-top: 0;
+    color: var(--color1);
+    font-size: 1.3rem;
+    border-bottom: 3px dotted var(--color3);
+    padding-bottom: 0.5rem;
+}
+
+.contents-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+}
+
+.contents-list li {
+    margin-bottom: 0.8rem;
+}
+
+.contents-list a {
+    display: block;
+    padding: 0.8rem 1rem;
+    background-color: var(--color6);
+    color: var(--text-dark);
+    text-decoration: none;
+    border-radius: 15px;
+    transition: all 0.3s;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+}
+
+.contents-list a:hover {
+    background-color: var(--color2);
+    color: white;
+    transform: translateY(-3px);
+}
+
+.contents-list a.active {
+    background-color: var(--color1);
+    color: white;
+    box-shadow: 0 4px 0 #cc4747;
+}
+
+.contents-list a.active:after {
+    content: "👉";
+    position: absolute;
+    right: 10px;
+}
+
+
+
+/* Notes Content */
+.notes-content {
+    flex: 1;
+    background-color: white;
+    border-radius: 30px;
+    padding: 2rem;
+    box-shadow: 0 8px 0 var(--color4);
+    border: 4px solid var(--color4);
+}
+
+.note-section {
+    margin-bottom: 3rem;
+    scroll-margin-top: 100px;
+}
+
+.note-section h2 {
+    font-family: 'Fredoka One', cursive;
+    color: var(--color1);
+    margin-top: 0;
+    font-size: 1.8rem;
+    background-color: var(--color3);
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    transform: rotate(-2deg);
+    box-shadow: 5px 5px 0 var(--color2);
+}
+
+.concept-image {
+    margin: 2rem 0;
+    text-align: center;
+    border-radius: 20px;
+    padding: 10px;
+    background-color: white;
+}
+
+.concept-image img {
+    width: 50rem;
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+.image-caption {
+    font-size: 0.9rem;
+    color: var(--color1);
+    margin-top: 0.8rem;
+    font-weight: 700;
+    font-style: italic;
+}
+
+.key-point {
+    background-color: var(--color6);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.key-point:before {
+    content: "💡";
+    position: absolute;
+    font-size: 3rem;
+    right: 20px;
+    top: 10px;
+    opacity: 0.2;
+}
+
+.key-point h4 {
+    font-family: 'Fredoka One', cursive;
+    color: var(--color1);
+    margin-top: 0;
+    font-size: 1.3rem;
+}
+
+.key-point ul {
+    padding-left: 1.5rem;
+}
+
+.key-point li {
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.key-point li:before {
+    content: "🐵";
+    margin-right: 8px;
+}
+
+/* Code Blocks */
+pre {
+    background-color: #2D3436;
+    border-radius: 20px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin: 2rem 0;
+    box-shadow: 0 8px 0 #1a1d1f;
+    position: relative;
+}
+
+pre:before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #FF5F56;
+    box-shadow: 25px 0 0 #FFBD2E, 50px 0 0 #27C93F;
+}
+
+code {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.code-explanation {
+    background-color: var(--color3);
+    padding: 1.5rem;
+    border-radius: 20px;
+    margin: 2rem 0;
+    border: 3px dashed var(--color1);
+}
+
+.code-explanation h4 {
+    font-family: 'Fredoka One', cursive;
+    color: var(--color1);
+    margin-top: 0;
+}
+
+.code-explanation ol {
+    padding-left: 1.5rem;
+}
+
+.code-explanation li {
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+}
+
+.code-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.code-example {
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--color6);
+    border: 3px solid var(--color6);
+    overflow: hidden;
+}
+
+.code-example h4 {
+    margin: 0;
+    padding: 1rem;
+    background-color: var(--color2);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+}
+
+/* Interactive Demo */
+.interactive-demo {
+    margin: 3rem 0;
+}
+
+.interactive-demo h4 {
+    font-family: 'Fredoka One', cursive;
+    color: var(--color1);
+    font-size: 1.3rem;
+    background-color: var(--color3);
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    transform: rotate(2deg);
+    box-shadow: 5px 5px 0 var(--color4);
+}
+
+.demo-container {
+    border: 4px solid var(--color5);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 0 #e68a8a;
+    margin-top: 1.5rem;
+}
+
+.code-editor {
+    background-color: #2D3436;
+    color: #d4d4d4;
+}
+
+.editor-header {
+    padding: 0.8rem 1rem;
+    background-color: #252526;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.9rem;
+    color: white;
+}
+
+.editor-body {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    background-color: #2D3436;
+    color: #d4d4d4;
+    border: none;
+    resize: vertical;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.run-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--color1);
+    color: white;
+    border: none;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.run-btn:hover {
+    background-color: #e05555;
+    letter-spacing: 1px;
+}
+
+.output-panel {
+    background-color: white;
+}
+
+.output-header {
+    padding: 0.8rem 1rem;
+    background-color: var(--color4);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+}
+
+.output-body {
+    padding: 1rem;
+    min-height: 50px;
+    font-family: 'Fira Code', monospace;
+    white-space: pre-wrap;
+    background-color: #f0f0f0;
+}
+
+/* Example Grid */
+.example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.example-card {
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 6px 0 var(--color3);
+    border: 3px solid var(--color3);
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.example-card:hover {
+    transform: translateY(-10px) rotate(2deg);
+    box-shadow: 0 16px 0 var(--color3);
+}
+
+.example-card h4 {
+    margin: 0;
+    padding: 1rem;
+    background-color: var(--color4);
+    color: white;
+    font-family: 'Fredoka One', cursive;
+}
+
+/* Footer */
+.notes-footer {
+    background: linear-gradient(135deg, var(--color2), var(--color4));
+    padding: 2rem 0;
+    border-top: 5px dashed var(--color3);
+    margin-top: 3rem;
+}
+
+.progress-tracker {
+    text-align: center;
+    color: white;
+}
+
+.progress-value {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: white;
+    text-shadow: 2px 2px 0 var(--color1);
+}
+
+.progress-bar {
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    margin: 1rem auto;
+    max-width: 400px;
+    overflow: hidden;
+    border: 3px solid white;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--color3);
+    border-radius: 8px;
+    transition: width 0.5s ease;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.next-topic-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--color1);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 0 #cc4747;
+    margin-top: 1rem;
+}
+
+.next-topic-btn:hover {
+    background-color: #e05555;
+    transform: translateY(-3px);
+    box-shadow: 0 9px 0 #cc4747;
+}
+
+.next-topic-btn i {
+    margin-left: 8px;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .notes-container {
+        flex-direction: column;
+    }
+
+    .notes-sidebar {
+        width: 100%;
+        position: static;
+    }
+
+    .code-comparison {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .notes-header h1 {
+        font-size: 2rem;
+    }
+
+    .example-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        width: 95%;
+    }
+
+    .notes-content {
+        padding: 1.5rem;
+    }
+
+    .note-section h2 {
+        font-size: 1.5rem;
+        display: block;
+        transform: rotate(0);
+        text-align: center;
+    }
 }

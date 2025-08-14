@@ -79,43 +79,12 @@
 }
 
 
-/* Courses Section */
-.typing-effect {
- position: relative;
-  display: inline-block;
-  font-size: 2.2rem;
-  color: #2d3436;
-  margin-bottom: 1rem;
-  padding-bottom: 8px;
-  overflow: hidden;
-}
-.typing-effect::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  width: 100%;
-  background: linear-gradient(to right, #00cec9, #0984e3);
-  transform: translateX(-100%);
-  animation: underlineLoop 2s linear infinite;
-}
-
-@keyframes underlineLoop {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
 .student-courses {
   display: grid;
   grid-template-columns: repeat(4, 1fr); /* Always 3 columns */
   /* margin-top: 1.5rem; */
   gap: 1rem;
-  height: 400px;
+  height: 550px;
   overflow: scroll;
   scrollbar-width: none;
 }
@@ -432,73 +401,14 @@
   background-color: #cbd5e0;
 }
 
-/* Exam Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
 
-.exam-modal {
-  background-color: white;
-  border-radius: 10px;
-  padding: 2rem;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
 
-.exam-modal h2 {
-  margin-top: 0;
-  color: #2d3748;
-}
 
-.exam-modal p {
-  color: #718096;
-  margin-bottom: 1.5rem;
-}
 
-.exam-modal input {
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  margin-bottom: 1.5rem;
-  font-size: 1rem;
-}
 
-.exam-modal input:focus {
-  outline: none;
-  border-color: #6c4df6;
-  box-shadow: 0 0 0 3px rgba(108, 77, 246, 0.2);
-}
 
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
 
-.cancel-btn {
-  padding: 0.6rem 1.2rem;
-  background-color: #e2e8f0;
-  color: #4a5568;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
 
-.cancel-btn:hover {
-  background-color: #cbd5e0;
-}
 
 /* Modal Styles */
 .modal-overlay {
@@ -514,7 +424,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.overlay-modal-content {
   background: white;
   padding: 30px;
   border-radius: 15px;
@@ -523,44 +433,33 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-.modal-content h2 {
-  margin: 0 0 15px 0;
-  color: #333;
-  font-size: 1.8rem;
-}
 
-.modal-content p {
-  margin: 0 0 25px 0;
-  color: #666;
-  line-height: 1.6;
-}
-
-.form-group {
+.modal-form-group {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.modal-form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
   color: #333;
 }
 
-.form-group input {
+.modal-form-group input {
   width: 100%;
   padding: 12px 15px;
   border: 2px solid #e9ecef;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 2rem;
   transition: border-color 0.3s ease;
 }
 
-.form-group input:focus {
+.modal-form-group input:focus {
   outline: none;
   border-color: #667eea;
 }
 
-.form-group input.error {
+.modal-form-group input.error {
   border-color: #dc3545;
 }
 
@@ -571,16 +470,16 @@
   display: block;
 }
 
-.modal-buttons {
+.overlay-modal-buttons {
   display: flex;
   gap: 15px;
   justify-content: flex-end;
   margin-top: 25px;
 }
 
-.cancel-btn {
+.overlay-modal-buttons .cancel-btn {
   padding: 12px 24px;
-  background: #6c757d;
+  background: var(--secondaryAccent);
   color: white;
   border: none;
   border-radius: 8px;
@@ -589,14 +488,14 @@
   transition: all 0.3s ease;
 }
 
-.cancel-btn:hover {
-  background: #5a6268;
+.overlay-modal-buttons .cancel-btn:hover {
+  background: red;
   transform: translateY(-2px);
 }
 
-.submit-btn {
+.overlay-modal-buttons .submit-btn {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #001BB7 0%, #0046FF 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -606,9 +505,9 @@
   transition: all 0.3s ease;
 }
 
-.submit-btn:hover {
+.overlay-modal-buttons .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--secondary);
 }
 
 /* Responsive Design */
