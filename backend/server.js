@@ -609,6 +609,42 @@ app.delete('/cobotKidsKenya/schools/:schoolId/classes/:classId/students/:student
   }
 });
 
+// Tutor-initiated student password reset
+app.post('/cobotKidsKenya/students/:studentId/resetPassword', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ success: false, error: 'Invalid student ID format' });
+    }
+
+    // Find the school and class containing this student
+    const school = await School.findOne({ 'classes.students._id': studentId });
+    if (!school) {
+      return res.status(404).json({ success: false, error: 'Student not found' });
+    }
+
+    const classDoc = (school.classes || []).find(c => (c.students || []).some(s => String(s._id) === String(studentId)));
+    if (!classDoc) {
+      return res.status(404).json({ success: false, error: 'Class not found for student' });
+    }
+
+    const student = (classDoc.students || []).find(s => String(s._id) === String(studentId));
+    if (!student) {
+      return res.status(404).json({ success: false, error: 'Student not found' });
+    }
+
+    // Generate a temporary password
+    const tempPassword = Math.random().toString(36).slice(2, 8).toUpperCase();
+    student.password = tempPassword;
+    await school.save();
+
+    return res.status(200).json({ success: true, data: { tempPassword } });
+  } catch (error) {
+    console.error('Error resetting student password:', error);
+    return res.status(500).json({ success: false, error: 'Server error while resetting password' });
+  }
+});
+
 
 // ===== TOPICS ROUTES ===== //
 
@@ -1519,6 +1555,8 @@ app.get('/cobotKidsKenya/tutors/:tutorId/assignments', async (req, res) => {
     const tutor = await Tutor.findById(tutorId).lean();
     if (!tutor) return res.status(404).json({ success: false, error: 'Tutor not found' });
 
+    console.log(`Fetching assignments for tutor ${tutorId}`);
+
     // Resolve school and class names
     const schoolIds = (tutor.assignments || []).map(a => a.school);
     const schools = await School.find({ _id: { $in: schoolIds } }).lean();
@@ -1527,27 +1565,128 @@ app.get('/cobotKidsKenya/tutors/:tutorId/assignments', async (req, res) => {
     const result = (tutor.assignments || []).map(a => {
       const s = schoolMap.get(String(a.school));
       const classInfos = (a.classes || []).map(c => {
-        // Classes are embedded in School model; find by _id
+        // Find the class in the school's embedded classes array
         const cls = s?.classes?.find(cl => String(cl._id) === String(c.class));
         return {
           classId: c.class,
-          className: cls?.name,
-          level: cls?.level,
-          isActive: c.isActive
+          className: cls?.name || 'Unknown Class',
+          level: cls?.level || 'Unknown Level',
+          isActive: c.isActive || false
         };
       });
+      
+      // Only return active classes
+      const activeClasses = classInfos.filter(c => c.isActive);
+      
       return {
         schoolId: a.school,
-        schoolName: s?.name,
-        schoolCode: s?.code,
-        classes: classInfos
+        schoolName: s?.name || 'Unknown School',
+        schoolCode: s?.code || 'Unknown',
+        classes: activeClasses
       };
     });
 
+    console.log(`Found ${result.length} assignments for tutor ${tutorId}`);
+    console.log('Assignment details:', result.map(a => ({ 
+      school: a.schoolName, 
+      classesCount: a.classes.length 
+    })));
+    
     return res.status(200).json({ success: true, data: result });
   } catch (error) {
     console.error('Error fetching assignments:', error);
     return res.status(500).json({ success: false, error: 'Server error while fetching assignments' });
+  }
+});
+
+// Get all students across a tutor's assigned classes (flattened)
+app.get('/cobotKidsKenya/tutors/:tutorId/students', async (req, res) => {
+  try {
+    const { tutorId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(tutorId)) {
+      return res.status(400).json({ success: false, error: 'Invalid tutor ID format' });
+    }
+
+    const Tutor = require('./models/Tutor');
+    const tutor = await Tutor.findById(tutorId).lean();
+    if (!tutor) {
+      return res.status(404).json({ success: false, error: 'Tutor not found' });
+    }
+
+    const assignments = Array.isArray(tutor.assignments) ? tutor.assignments : [];
+    if (assignments.length === 0) {
+      console.log(`No assignments found for tutor ${tutorId}`);
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    console.log(`Tutor ${tutorId} has ${assignments.length} school assignments`);
+
+    // Get all schools that the tutor is assigned to
+    const schoolIds = assignments.map(a => a.school).filter(Boolean);
+    const schools = await School.find({ _id: { $in: schoolIds } }).lean();
+    const schoolMap = new Map(schools.map(s => [String(s._id), s]));
+
+    console.log(`Found ${schools.length} schools:`, schools.map(s => ({ id: s._id, name: s.name, classesCount: s.classes?.length || 0 })));
+
+    const aggregated = [];
+    const seen = new Set();
+
+    for (const assignment of assignments) {
+      const school = schoolMap.get(String(assignment.school));
+      if (!school) {
+        console.log(`School ${assignment.school} not found in database`);
+        continue;
+      }
+      
+      console.log(`Processing school: ${school.name} (${school._id})`);
+      
+      const classes = Array.isArray(assignment.classes) ? assignment.classes : [];
+      console.log(`School has ${classes.length} assigned classes:`, classes.map(c => ({ classId: c.class, isActive: c.isActive })));
+      
+      for (const clsRef of classes) {
+        // Only process active classes
+        if (!clsRef.isActive) {
+          console.log(`Skipping inactive class ${clsRef.class}`);
+          continue;
+        }
+        
+        // Find the class in the school's embedded classes array
+        const classDoc = (school.classes || []).find(c => String(c._id) === String(clsRef.class));
+        if (!classDoc) {
+          console.log(`Class ${clsRef.class} not found in school ${school._id}`);
+          continue;
+        }
+        
+        console.log(`Found class: ${classDoc.name} with ${classDoc.students?.length || 0} students`);
+        
+        const students = Array.isArray(classDoc.students) ? classDoc.students : [];
+        for (const s of students) {
+          const key = String(s._id);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          aggregated.push({
+            id: String(s._id),
+            name: `${s.fname || ''} ${s.lname || ''}`.trim(),
+            fname: s.fname,
+            lname: s.lname,
+            gender: s.gender || 'N/A',
+            username: s.username,
+            schoolId: String(school._id),
+            schoolName: school.name,
+            classId: String(classDoc._id),
+            className: classDoc.name,
+            performance: s.performance || 'Meets Expectation',
+            lastLogin: s.lastLogin || null
+          });
+        }
+      }
+    }
+
+    console.log(`Found ${aggregated.length} total students for tutor ${tutorId}`);
+    return res.status(200).json({ success: true, data: aggregated });
+  } catch (error) {
+    console.error('Error fetching tutor students:', error);
+    return res.status(500).json({ success: false, error: 'Server error while fetching students' });
   }
 });
 
@@ -1709,7 +1848,7 @@ app.post('/cobotKidsKenya/schools/:schoolId/classes/:classId/generateCode', asyn
     }
     
     // Enforce at most 3 active codes
-    const activeCodes = (classDoc.classCodes || []).filter(c => c.status === 'active');
+    const activeCodes = (setRecentCodesclassDoc.classCodes || []).filter(c => c.status === 'active');
     if (activeCodes.length >= 3) {
       return res.status(400).json({ 
         success: false, 
@@ -2601,4 +2740,33 @@ function calculateGrade(percentage) {
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+// Debug endpoint to check schools and classes
+app.get('/cobotKidsKenya/debug/schools', async (req, res) => {
+  try {
+    const schools = await School.find({}).lean();
+    const summary = schools.map(s => ({
+      id: s._id,
+      name: s.name,
+      code: s.code,
+      classesCount: s.classes?.length || 0,
+      classes: s.classes?.map(c => ({
+        id: c._id,
+        name: c.name,
+        studentsCount: c.students?.length || 0
+      })) || []
+    }));
+    
+    res.status(200).json({ 
+      success: true, 
+      data: summary,
+      totalSchools: schools.length,
+      totalClasses: schools.reduce((sum, s) => sum + (s.classes?.length || 0), 0),
+      totalStudents: schools.reduce((sum, s) => sum + (s.classes?.reduce((csum, c) => csum + (c.students?.length || 0), 0) || 0), 0)
+    });
+  } catch (error) {
+    console.error('Error in debug endpoint:', error);
+    res.status(500).json({ success: false, error: 'Server error' });
+  }
 });
