@@ -1,4 +1,4 @@
-export { default as TutorDashboard } from './TutorDashboard';
+// export { default as TutorDashboard } from './TutorDashboard';
 export { default as TutorDashboardMainArea } from './TutorDashboardMainArea';
 export { default as AddStudent } from './AddStudent';
 export { default as ClassCodeGenarator } from './ClassCodeGenarator';

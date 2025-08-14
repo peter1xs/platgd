@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import ComingSoon  from "../../components/comingSoon/ComingSoon"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faHome, 
@@ -24,28 +25,35 @@ import {
   faSchool,
   faChalkboardTeacher
 } from '@fortawesome/free-solid-svg-icons';
-import './styles/TutorDashboard.css';
+import './/TutorDashboard.css';
 
 function TutorDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');  
   const [showSelfRegistration, setShowSelfRegistration] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSchool, setSelectedSchool] = useState('Bright gift School');
-  const [selectedClass, setSelectedClass] = useState('Grade 7 wisdom');
   const [performanceFilter, setPerformanceFilter] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
   const [assignments, setAssignments] = useState([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [assignmentsError, setAssignmentsError] = useState('');
-  const [recentCodes, setRecentCodes] = useState({}); // key: classId -> { code, validUntil }
+  const [recentCodes, setRecentCodes] = useState({});
   const [tutorDetails, setTutorDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Student management state
+  const [students, setStudents] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [errorStudents, setErrorStudents] = useState('');
+  const [selectedSchoolId, setSelectedSchoolId] = useState('');
+  const [selectedClassId, setSelectedClassId] = useState('');
+  const [schoolsList, setSchoolsList] = useState([]);
+  const [classesList, setClassesList] = useState([]);
 
-  // Fetch tutor details
+  // Fetch tutor details and assignments
   useEffect(() => {
-    const fetchTutorDetails = async () => {
+    const fetchTutorData = async () => {
       try {
         const profileRaw = localStorage.getItem('tutor_profile');
         if (!profileRaw) throw new Error('No tutor profile found');
@@ -55,107 +63,141 @@ function TutorDashboard() {
         if (!tutorId) throw new Error('No tutor ID found');
 
         // Fetch tutor details
-        const tutorResponse = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutorId}`);
-        if (!tutorResponse.ok) {
-          throw new Error(`HTTP error! status: ${tutorResponse.status}`);
-        }
-        
-        const tutorResult = await tutorResponse.json();
-        setTutorDetails(tutorResult.data || null);
+        const tutorResponse = await axios.get(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutorId}`);
+        setTutorDetails(tutorResponse.data.data || null);
 
         // Fetch assignments
         setAssignmentsLoading(true);
-        setAssignmentsError('');
-        const assignmentsResponse = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutorId}/assignments`);
-        const assignmentsData = await assignmentsResponse.json();
+        const assignmentsResponse = await axios.get(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutorId}/assignments`);
+        setAssignments(Array.isArray(assignmentsResponse.data.data) ? assignmentsResponse.data.data : []);
+
+        // Fetch students
+        setLoadingStudents(true);
+        const studentsResponse = await axios.get(`https://platform-zl0a.onrender.com/tutor/${tutorId}/assignments/${classId}/students`);
+        setStudents(studentsResponse.data.data || []);
+
+        // Extract unique schools and classes
+        const schools = [...new Set(studentsResponse.data.data.map(s => ({
+          id: s.schoolId,
+          name: s.schoolName
+          
+        })))];
         
-        if (!assignmentsData.success) {
-          throw new Error(assignmentsData.error || 'Failed to load assignments');
+        const classes = [...new Set(studentsResponse.data.data.map(s => ({
+          id: s.classId,
+          name: s.className,
+          schoolId: s.schoolId
+        })))];
+        
+        setSchoolsList(schools);
+        setClassesList(classes);
+        
+        // Set initial filters if data exists
+        if (schools.length > 0) {
+          setSelectedSchoolId(schools[0].id);
         }
-        
-        setAssignments(Array.isArray(assignmentsData.data) ? assignmentsData.data : []);
+        if (classes.length > 0) {
+          setSelectedClassId(classes[0].id);
+        }
+
       } catch (err) {
         setError(err.message);
         console.error("Failed to fetch tutor data:", err);
       } finally {
         setLoading(false);
         setAssignmentsLoading(false);
+        setLoadingStudents(false);
       }
     };
 
-    fetchTutorDetails();
+    fetchTutorData();
   }, []);
 
-  // Sample data - will be replaced with actual data from API
+  // Filter and sort students
+  const filteredStudents = students.filter(student => {
+    const matchesSchool = selectedSchoolId ? student.schoolId === selectedSchoolId : true;
+    const matchesClass = selectedClassId ? student.classId === selectedClassId : true;
+    const matchesSearch = searchQuery 
+      ? student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        student.username.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    const matchesPerformance = performanceFilter !== 'all' 
+      ? student.performance === performanceFilter 
+      : true;
+    
+    return matchesSchool && matchesClass && matchesSearch && matchesPerformance;
+  });
+
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+    if (sortBy === 'name') {
+      return sortOrder === 'asc' 
+        ? a.name.localeCompare(b.name) 
+        : b.name.localeCompare(a.name);
+    } else if (sortBy === 'performance') {
+      return sortOrder === 'asc' 
+        ? a.performance.localeCompare(b.performance) 
+        : b.performance.localeCompare(a.performance);
+    } else if (sortBy === 'lastLogin') {
+      return sortOrder === 'asc' 
+        ? new Date(a.lastLogin) - new Date(b.lastLogin)
+        : new Date(b.lastLogin) - new Date(a.lastLogin);
+    }
+    return 0;
+  });
+
+  // Dashboard stats
   const dashboardStats = {
-    students: 0,
+    students: students.length,
     schools: assignments.length || 0,
     classes: assignments.reduce((sum, a) => sum + (a.classes?.length || 0), 0) || 0,
     rating: 0
   };
 
-  const students = [
-    {
-      id: 1,
-      name: 'Sabra Odongo',
-      gender: 'female',
-      username: 'mrm-sabraodongo',
-      school: 'Bright gift School',
-      class: 'Grade 7 wisdom',
-      performance: 'Exceeds Expectation',
-      lastLogin: '18-07-2025 11:31 AM'
-    },
-    {
-      id: 2,
-      name: 'Cassie Kariuki',
-      gender: 'female',
-      username: 'mrm-cassiekariuki',
-      school: 'Bright gift School',
-      class: 'Grade 7 wisdom',
-      performance: 'Exceeds Expectation',
-      lastLogin: '25-07-2025 11:42 AM'
-    },
-    {
-      id: 3,
-      name: 'Cyrill Anyanga',
-      gender: 'male',
-      username: 'mrm-cyrillanyanga',
-      school: 'Bright gift School',
-      class: 'Grade 7 wisdom',
-      performance: 'Exceeds Expectation',
-      lastLogin: '20-07-2025 09:15 AM'
+  const handleResetPassword = async (studentId) => {
+    if (window.confirm('Are you sure you want to reset this student\'s password?')) {
+      try {
+        const response = await axios.post(
+          `https://platform-zl0a.onrender.com/cobotKidsKenya/students/${studentId}/resetPassword`,
+          {},
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+        
+        if (response.data.success) {
+          alert('Password reset successful! New temporary password: ' + response.data.data.tempPassword);
+        } else {
+          throw new Error(response.data.error || 'Failed to reset password');
+        }
+      } catch (err) {
+        alert(err.message || 'Failed to reset password');
+        console.error("Password reset error:", err);
+      }
     }
-  ];
+  };
 
-  const schools = [
-    { id: 1, name: 'Bright gift School', location: 'Nairobi', students: 150, status: 'Active' },
-    { id: 2, name: 'GraceLand School', location: 'Mombasa', students: 200, status: 'Active' }
-  ];
 
-  const lessons = [
-    { id: 1, title: 'Introduction to Python', date: '2025-08-05', time: '09:00 AM', status: 'Scheduled' },
-    { id: 2, title: 'Web Development Basics', date: '2025-08-06', time: '10:00 AM', status: 'Scheduled' }
-  ];
-
-  const generateSelfRegistrationCode = () => {
+ const generateSelfRegistrationCode = () => {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     setShowSelfRegistration(true);
     // In a real app, this would be sent to the backend
     alert(`Generated Code: ${code}`);
   };
 
-  const resetFilters = () => {
-    setSearchQuery('');
-    setSelectedSchool('Bright gift School');
-    setSelectedClass('Grade 7 wisdom');
-    setPerformanceFilter('all');
-    setSortBy('name');
-    setSortOrder('asc');
-  };
-
   const handleGenerateClassCode = async (schoolId, classId) => {
     try {
-      const res = await axios.post(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${classId}/generateCode`, {});
+      const res = await axios.post(
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${classId}/generateCode`, 
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
       const payload = res?.data?.data;
       if (payload?.code) {
         setRecentCodes(prev => ({ ...prev, [classId]: { code: payload.code, validUntil: payload.validUntil } }));
@@ -168,6 +210,14 @@ function TutorDashboard() {
     }
   };
 
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedSchoolId(schoolsList[0]?.id || '');
+    setSelectedClassId(classesList[0]?.id || '');
+    setPerformanceFilter('all');
+    setSortBy('name');
+    setSortOrder('asc');
+  };
   const renderDashboard = () => (
     <div className="dashboard-overview">
       <h1>Hello {tutorDetails?.fname || 'Tutor'}, Here is an overview of your tutor's dashboard.</h1>
@@ -238,8 +288,6 @@ function TutorDashboard() {
       </div>
     </div>
   );
-
-  // ... [rest of the render functions remain exactly the same] ...
   const renderStudents = () => (
     <div className="students-management">
       <h1>Student Management</h1>
@@ -247,21 +295,31 @@ function TutorDashboard() {
       <div className="filters-section">
         <div className="filter-row">
           <select 
-            value={selectedSchool} 
-            onChange={(e) => setSelectedSchool(e.target.value)}
+            value={selectedSchoolId} 
+            onChange={(e) => {
+              setSelectedSchoolId(e.target.value);
+              setSelectedClassId('');
+            }}
             className="filter-select"
           >
-            <option value="Bright gift School">Bright gift School</option>
-            <option value="GraceLand School">GraceLand School</option>
+            <option value="">All Schools</option>
+            {schoolsList.map(school => (
+              <option key={school.id} value={school.id}>{school.name}</option>
+            ))}
           </select>
           
           <select 
-            value={selectedClass} 
-            onChange={(e) => setSelectedClass(e.target.value)}
+            value={selectedClassId} 
+            onChange={(e) => setSelectedClassId(e.target.value)}
             className="filter-select"
+            disabled={!selectedSchoolId}
           >
-            <option value="Grade 7 wisdom">Grade 7 wisdom</option>
-            <option value="Grade 8 wisdom">Grade 8 wisdom</option>
+            <option value="">All Classes</option>
+            {classesList
+              .filter(cls => !selectedSchoolId || cls.schoolId === selectedSchoolId)
+              .map(cls => (
+                <option key={cls.id} value={cls.id}>{cls.name}</option>
+              ))}
           </select>
           
           <div className="search-box">
@@ -276,17 +334,23 @@ function TutorDashboard() {
         </div>
         
         <div className="filter-row">
-          <button className="filter-btn">
-            <FontAwesomeIcon icon={faFilter} />
-            Filter by Performance Rating
-          </button>
+          <select 
+            value={performanceFilter} 
+            onChange={(e) => setPerformanceFilter(e.target.value)}
+            className="filter-select"
+          >
+            <option value="all">All Performances</option>
+            <option value="Below Expectation">Below Expectation</option>
+            <option value="Meets Expectation">Meets Expectation</option>
+            <option value="Exceeds Expectation">Exceeds Expectation</option>
+          </select>
           
           <select 
             value={sortBy} 
             onChange={(e) => setSortBy(e.target.value)}
             className="filter-select"
           >
-            <option value="name">Sort By</option>
+            <option value="name">Name</option>
             <option value="performance">Performance</option>
             <option value="lastLogin">Last Login</option>
           </select>
@@ -296,7 +360,7 @@ function TutorDashboard() {
             onChange={(e) => setSortOrder(e.target.value)}
             className="filter-select"
           >
-            <option value="asc">Order</option>
+            <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
           
@@ -307,49 +371,76 @@ function TutorDashboard() {
         </div>
       </div>
 
-      <div className="students-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Gender</th>
-              <th>Username</th>
-              <th>School</th>
-              <th>Class</th>
-              <th>Performance Rating</th>
-              <th>Last login</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map(student => (
-              <tr key={student.id}>
-                <td>
-                  <Link to={`/student/${student.id}`} className="student-name">
-                    {student.name}
-                  </Link>
-                </td>
-                <td>{student.gender}</td>
-                <td>{student.username}</td>
-                <td>{student.school}</td>
-                <td>{student.class}</td>
-                <td>
-                  <span className="performance-badge">
-                    <FontAwesomeIcon icon={faStar} />
-                    {student.performance}
-                  </span>
-                </td>
-                <td>{student.lastLogin}</td>
-                <td>
-                  <button className="action-btn">
-                    <FontAwesomeIcon icon={faEllipsisV} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loadingStudents ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading students...</p>
+        </div>
+      ) : errorStudents ? (
+        <div className="error-message">
+          {errorStudents}
+        </div>
+      ) : (
+        <div className="students-table">
+          {sortedStudents.length > 0 ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Gender</th>
+                  <th>Username</th>
+                  <th>School</th>
+                  <th>Class</th>
+                  <th>Performance Rating</th>
+                  <th>Last login</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedStudents.map(student => (
+                  <tr key={student.id}>
+                    <td>
+                      <Link to={`/schools/${student.schoolId}/classes/${student.classId}/students/${student.id}`} className="student-name">
+                        {student.name}
+                      </Link>
+                    </td>
+                    <td>{student.gender}</td>
+                    <td>{student.username}</td>
+                    <td>{student.schoolName}</td>
+                    <td>{student.className}</td>
+                    <td>
+                      <span className={`performance-badge ${student.performance.toLowerCase().replace(' ', '-')}`}>
+                        <FontAwesomeIcon icon={faStar} />
+                        {student.performance}
+                      </span>
+                    </td>
+                    <td>{student.lastLogin ? new Date(student.lastLogin).toLocaleString() : 'Never'}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="action-btn reset-password-btn"
+                          onClick={() => handleResetPassword(student.id)}
+                          title="Reset Password"
+                        >
+                          <FontAwesomeIcon icon={faKey} />
+                        </button>
+                        <button className="action-btn more-btn">
+                          <FontAwesomeIcon icon={faEllipsisV} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="empty-state">
+              <FontAwesomeIcon icon={faExclamationCircle} />
+              <p>No students found matching your criteria</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -370,25 +461,26 @@ function TutorDashboard() {
         </div>
       </div>
 
-      {schools.length > 0 ? (
+      {assignments.length > 0 ? (
         <div className="schools-grid">
-          {schools.map(school => (
-            <div key={school.id} className="school-card">
+          {assignments.map(school => (
+            <div key={school.schoolId} className="school-card">
               <div className="school-icon">
                 <FontAwesomeIcon icon={faBuilding} />
               </div>
-              <h3>{school.name}</h3>
-              <p>{school.location}</p>
+              <h3>{school.schoolName}</h3>
+              <p>{school.schoolLocation || 'Location not specified'}</p>
               <div className="school-stats">
-                <span>{school.students} Students</span>
-                <span className={`status ${school.status.toLowerCase()}`}>
-                  {school.status}
-                </span>
+                <span>{school.studentCount || 0} Students</span>
+                <span className="status active">Active</span>
               </div>
-              <button className="view-school-btn">
-                View Details
+              <Link 
+                to={`/schools/${school.schoolId}/classes`}
+                className="view-school-btn"
+              >
+                View Classes
                 <FontAwesomeIcon icon={faArrowRight} />
-              </button>
+              </Link>
             </div>
           ))}
         </div>
@@ -401,47 +493,49 @@ function TutorDashboard() {
     </div>
   );
 
-  const renderLessons = () => (
-    <div className="lessons-management">
-      <h1>Classes</h1>
+  // ... [keep other render functions the same] ...
 
-      {assignmentsLoading && (
-        <div className="empty-state"><p>Loading your classes...</p></div>
-      )}
-      {assignmentsError && (
-        <div className="empty-state"><p>{assignmentsError}</p></div>
-      )}
+    const renderLessons = () => (
+      <div className="lessons-management">
+        <h1>Classes</h1>
 
-      {!assignmentsLoading && !assignmentsError && (
-        assignments?.length > 0 ? (
-          <div className="lessons-grid">
-            {assignments.map(assign => (
-              (assign.classes || []).filter(c => c.isActive).map(cls => (
-                <div key={`${assign.schoolId}-${cls.classId}`} className="lesson-card">
-                  <div className="lesson-icon">
-                    <FontAwesomeIcon icon={faBookOpen} />
+        {assignmentsLoading && (
+          <div className="empty-state"><p>Loading your classes...</p></div>
+        )}
+        {assignmentsError && (
+          <div className="empty-state"><p>{assignmentsError}</p></div>
+        )}
+
+        {!assignmentsLoading && !assignmentsError && (
+          assignments?.length > 0 ? (
+            <div className="lessons-grid">
+              {assignments.map(assign => (
+                (assign.classes || []).filter(c => c.isActive).map(cls => (
+                  <div key={`${assign.schoolId}-${cls.classId}`} className="lesson-card">
+                    <div className="lesson-icon">
+                      <FontAwesomeIcon icon={faBookOpen} />
+                    </div>
+                    <h3>{cls.className || 'Unnamed Class'}</h3>
+                    <p>{assign.schoolName} ({assign.schoolCode})</p>
+                    {recentCodes[cls.classId] ? (
+                      <p>Current Code: <strong>{recentCodes[cls.classId].code}</strong></p>
+                    ) : null}
+                    <button className="view-school-btn" onClick={() => handleGenerateClassCode(assign.schoolId, cls.classId)}>
+                      Generate Class Code
+                    </button>
                   </div>
-                  <h3>{cls.className || 'Unnamed Class'}</h3>
-                  <p>{assign.schoolName} ({assign.schoolCode})</p>
-                  {recentCodes[cls.classId] ? (
-                    <p>Current Code: <strong>{recentCodes[cls.classId].code}</strong></p>
-                  ) : null}
-                  <button className="view-school-btn" onClick={() => handleGenerateClassCode(assign.schoolId, cls.classId)}>
-                    Generate Class Code
-                  </button>
-                </div>
-              ))
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <FontAwesomeIcon icon={faExclamationCircle} />
-            <p>No classes found for your assignments</p>
-          </div>
-        )
-      )}
-    </div>
-  );
+                ))
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <FontAwesomeIcon icon={faExclamationCircle} />
+              <p>No classes found for your assignments</p>
+            </div>
+          )
+        )}
+      </div>
+    );
 
   const renderFormLinks = () => (
     <div className="form-links-management">
@@ -454,8 +548,9 @@ function TutorDashboard() {
   );
 
 
+
   return (
-    <div className="tutor-dashboard">
+  <div className="tutor-dashboard">
       {/* Sidebar */}
       <aside className="dashboard-sidebar">
         <div className="sidebar-header">
@@ -541,7 +636,14 @@ function TutorDashboard() {
         ) : (
           <>
             {activeTab === 'dashboard' && renderDashboard()}
-            {activeTab === 'students' && renderStudents()}
+            {activeTab === 'students' && 
+            
+            (
+              <div>
+                <h2>My Studentd</h2>
+                  <ComingSoon />
+              </div>
+            )}
             {activeTab === 'schools' && renderSchools()}
             {activeTab === 'lessons' && renderLessons()}
             {activeTab === 'formLinks' && renderFormLinks()}

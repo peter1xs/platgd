@@ -22,8 +22,8 @@ import ClassesPage from "./platforms/admin/pages/classes/page";
 
 // Tutors Imports
 import TutorLoginPage from "./platforms/tutor/TutorLoginPage";
-import TutorCreateAccount from "./platforms/tutor/TutorCreateAccount";
-import ClassCodeGenarator from "./platforms/tutor/ClassCodeGenarator";
+// import TutorCreateAccount from "./platforms/tutor/TutorCreateAccount";
+// import ClassCodeGenarator from "./platforms/tutor/ClassCodeGenarator";
 import TutorDashboard from "./platforms/tutor/TutorDashboard";
 
 // In your main routing file (e.g., App.jsx)
@@ -47,9 +47,9 @@ const router = createBrowserRouter([
   { path: "/", element: <Landpage /> },
   { path: "studentauth", element: <StudentLogInPage /> },
   { path: "tutorLogInAuth", element: <TutorLoginPage /> },
-  { path: "tutorCreateAuth", element: <TutorCreateAccount /> },
+  // { path: "tutorCreateAuth", element: <TutorCreateAccount /> },
   { path: "studentClassAccess", element: <ClassAccess /> },
-  { path: "classCodeGenarator", element: <ClassCodeGenarator /> },
+  // { path: "classCodeGenarator", element: <ClassCodeGenarator /> },
   { path: "studentDashBoard", element: <StudentDashBoard /> },
   { path: "webcodingpage", element: <WebCoding /> },
   { path: "scratch", element: <Scratch /> },
