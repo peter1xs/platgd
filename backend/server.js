@@ -919,6 +919,99 @@ app.post('/cobotKidsKenya/courses/:courseId/exams/:examId/publish', async (req, 
 
 // ===== END EXAMS ROUTES ===== //
 
+// Tutor login endpoint
+app.post('/cobotKidsKenya/tutors/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    console.log('Tutor login attempt for:', username);
+
+    // 1. Input validation
+    if (!username || !password) {
+      console.log('Missing credentials');
+      return res.status(400).json({
+        success: false,
+        error: 'Username and password are required'
+      });
+    }
+
+    // 2. Find tutor by username
+    const Tutor = require('./models/Tutor');
+    const tutor = await Tutor.findOne({ username }).select('+password');
+    
+    if (!tutor) {
+      console.log('Tutor not found with username:', username);
+      return res.status(404).json({ 
+        success: false,
+        error: 'Tutor not found. Please check your username.' 
+      });
+    }
+
+    // 3. Check account status
+    if (tutor.status !== 'active') {
+      console.log('Tutor account not active:', tutor.status);
+      return res.status(403).json({ 
+        success: false,
+        error: 'Your account is not active. Please contact admin.' 
+      });
+    }
+
+    // 4. Password verification (in a real app, use bcrypt.compare)
+    if (password !== tutor.password) {
+      console.log('Password does not match');
+      return res.status(401).json({ 
+        success: false,
+        error: 'Invalid password' 
+      });
+    }
+
+    // 5. Create JWT token
+    if (!process.env.JWT_SECRET) {
+      console.warn('Warning: Using development JWT secret');
+      process.env.JWT_SECRET = 'development-secret-please-change-in-production';
+    }
+
+    const token = jwt.sign(
+      {
+        id: tutor._id,
+        role: 'tutor',
+        company: tutor.company,
+        permissions: tutor.permissions
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // 6. Prepare response (excluding sensitive data)
+    const tutorData = tutor.toObject();
+    delete tutorData.password;
+    delete tutorData.__v;
+
+    const responseData = {
+      success: true,
+      data: {
+        tutor: tutorData,
+        token
+      }
+    };
+
+    console.log('Login successful for tutor:', tutor.username);
+    return res.status(200).json(responseData);
+
+  } catch (error) {
+    console.error('TUTOR LOGIN ERROR:', {
+      message: error.message,
+      stack: error.stack,
+      fullError: JSON.stringify(error, Object.getOwnPropertyNames(error))
+    });
+    
+    return res.status(500).json({ 
+      success: false,
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 
 // student Login
 // Add this to your server.js or routes file

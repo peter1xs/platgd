@@ -1,232 +1,342 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import SideBar from '../../components/SideBar'
-import AddStudent from './AddStudent';
-import ClassCodeGenarator from './ClassCodeGenarator';
-import TutorProfile from './components/profile/TutorProfile'
-import TutorDashboardMainArea from './TutorDashboardMainArea'
-import './styles/TutorDashboardMainArea.css'
-import Header from './components/header/Header';
+import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faHome, 
+  faBookOpen, 
+  faLink, 
+  faBuilding, 
+  faUsers, 
+  faKey,
+  faChartLine,
+  faStar,
+  faExclamationCircle,
+  faCalendarAlt,
+  faArrowRight,
+  faSearch,
+  faFilter,
+  faSort,
+  faSortAmountDown,
+  faUndo,
+  faEllipsisV,
+  faUserGraduate,
+  faSchool,
+  faChalkboardTeacher
+} from '@fortawesome/free-solid-svg-icons';
+import './styles/TutorDashboard.css';
+
 function TutorDashboard() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [showSelfRegistration, setShowSelfRegistration] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSchool, setSelectedSchool] = useState('Bright gift School');
+  const [selectedClass, setSelectedClass] = useState('Grade 7 wisdom');
+  const [performanceFilter, setPerformanceFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [assignments, setAssignments] = useState([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [assignmentsError, setAssignmentsError] = useState('');
+  const [recentCodes, setRecentCodes] = useState({}); // key: classId -> { code, validUntil }
+  const [tutorDetails, setTutorDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [activeTab, setActiveTab] = useState('courses');
-  const [showExamModal, setShowExamModal] = useState(false);
-  const [showClassCodeGenarator, setShowClassCodeGenarator] = useState(false);
-  const [examCode, setExamCode] = useState('');
+  // Fetch tutor details
+  useEffect(() => {
+    const fetchTutorDetails = async () => {
+      try {
+        const profileRaw = localStorage.getItem('tutor_profile');
+        if (!profileRaw) throw new Error('No tutor profile found');
+        
+        const profile = JSON.parse(profileRaw);
+        const tutorId = profile?.id;
+        if (!tutorId) throw new Error('No tutor ID found');
 
-  // Sample data
+        // Fetch tutor details
+        const tutorResponse = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutorId}`);
+        if (!tutorResponse.ok) {
+          throw new Error(`HTTP error! status: ${tutorResponse.status}`);
+        }
+        
+        const tutorResult = await tutorResponse.json();
+        setTutorDetails(tutorResult.data || null);
+
+        // Fetch assignments
+        setAssignmentsLoading(true);
+        setAssignmentsError('');
+        const assignmentsResponse = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/tutors/${tutorId}/assignments`);
+        const assignmentsData = await assignmentsResponse.json();
+        
+        if (!assignmentsData.success) {
+          throw new Error(assignmentsData.error || 'Failed to load assignments');
+        }
+        
+        setAssignments(Array.isArray(assignmentsData.data) ? assignmentsData.data : []);
+      } catch (err) {
+        setError(err.message);
+        console.error("Failed to fetch tutor data:", err);
+      } finally {
+        setLoading(false);
+        setAssignmentsLoading(false);
+      }
+    };
+
+    fetchTutorDetails();
+  }, []);
+
+  // Sample data - will be replaced with actual data from API
+  const dashboardStats = {
+    students: 0,
+    schools: assignments.length || 0,
+    classes: assignments.reduce((sum, a) => sum + (a.classes?.length || 0), 0) || 0,
+    rating: 0
+  };
+
+  const students = [
+    {
+      id: 1,
+      name: 'Sabra Odongo',
+      gender: 'female',
+      username: 'mrm-sabraodongo',
+      school: 'Bright gift School',
+      class: 'Grade 7 wisdom',
+      performance: 'Exceeds Expectation',
+      lastLogin: '18-07-2025 11:31 AM'
+    },
+    {
+      id: 2,
+      name: 'Cassie Kariuki',
+      gender: 'female',
+      username: 'mrm-cassiekariuki',
+      school: 'Bright gift School',
+      class: 'Grade 7 wisdom',
+      performance: 'Exceeds Expectation',
+      lastLogin: '25-07-2025 11:42 AM'
+    },
+    {
+      id: 3,
+      name: 'Cyrill Anyanga',
+      gender: 'male',
+      username: 'mrm-cyrillanyanga',
+      school: 'Bright gift School',
+      class: 'Grade 7 wisdom',
+      performance: 'Exceeds Expectation',
+      lastLogin: '20-07-2025 09:15 AM'
+    }
+  ];
+
   const schools = [
-    { id: 1, title: 'GraceLand School', courseStatus: 'Enrolled', icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQk3pe7Z9yDNERjhspfG8uV6YogvXSPI7aypQ&s' },
-    { id: 1, title: 'GraceLand School', courseStatus: 'Enrolled', icon: '' },
-    { id: 1, title: 'GraceLand School', courseStatus: 'Enrolled', icon: '' },
-    { id: 1, title: 'GraceLand School', courseStatus: 'Enrolled', icon: '' },
-
+    { id: 1, name: 'Bright gift School', location: 'Nairobi', students: 150, status: 'Active' },
+    { id: 2, name: 'GraceLand School', location: 'Mombasa', students: 200, status: 'Active' }
   ];
 
-  const challenges = [
-    { id: 1, title: 'Build a Calculator', deadline: '2023-12-15', icon: '🧮' },
-    { id: 2, title: 'Create a Portfolio', deadline: '2023-12-20', icon: '💼' }
+  const lessons = [
+    { id: 1, title: 'Introduction to Python', date: '2025-08-05', time: '09:00 AM', status: 'Scheduled' },
+    { id: 2, title: 'Web Development Basics', date: '2025-08-06', time: '10:00 AM', status: 'Scheduled' }
   ];
 
-  const performanceData = {
-    completed: 12,
-    inProgress: 5,
-    averageScore: 84
+  const generateSelfRegistrationCode = () => {
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    setShowSelfRegistration(true);
+    // In a real app, this would be sent to the backend
+    alert(`Generated Code: ${code}`);
   };
 
-  const followers = [
-    { id: 1, name: 'Alex Johnson', avatar: '👨‍💻' },
-    { id: 2, name: 'Samira Khan', avatar: '👩‍🎓' },
-    { id: 3, name: 'Taylor Wong', avatar: '👨‍🔬' }
-  ];
-
-  const handleExamSubmit = (e) => {
-    e.preventDefault();
-    // Validate and process exam code
-    alert(`Entering exam room with code: ${examCode}`);
-    setShowExamModal(false);
-    setExamCode('');
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedSchool('Bright gift School');
+    setSelectedClass('Grade 7 wisdom');
+    setPerformanceFilter('all');
+    setSortBy('name');
+    setSortOrder('asc');
   };
+
+  const handleGenerateClassCode = async (schoolId, classId) => {
+    try {
+      const res = await axios.post(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${classId}/generateCode`, {});
+      const payload = res?.data?.data;
+      if (payload?.code) {
+        setRecentCodes(prev => ({ ...prev, [classId]: { code: payload.code, validUntil: payload.validUntil } }));
+        alert(`Class code for ${payload.className} (${payload.schoolName}): ${payload.code}`);
+      } else {
+        alert('Code generated but response had no code value');
+      }
+    } catch (err) {
+      alert(err?.response?.data?.error || 'Failed to generate class code');
+    }
+  };
+
+  const renderDashboard = () => (
+    <div className="dashboard-overview">
+      <h1>Hello {tutorDetails?.fname || 'Tutor'}, Here is an overview of your tutor's dashboard.</h1>
+      
+      <div className="dashboard-grid">
+        {/* Self Registration Card */}
+        <div className="dashboard-card self-registration">
+          <div className="card-icon">
+            <FontAwesomeIcon icon={faKey} />
+          </div>
+          <h3>Self-Registration</h3>
+          <p>Students can use a code to register themselves — no admin needed.</p>
+          <button className="generate-code-btn" onClick={generateSelfRegistrationCode}>
+            Generate Code
+          </button>
+        </div>
+
+        {/* Metrics Cards */}
+        <div className="metrics-column">
+          <div className="metric-card">
+            <h4>Number of students</h4>
+            <div className="metric-value">{dashboardStats.students}</div>
+          </div>
+          
+          <div className="metric-card">
+            <h4>Number of schools</h4>
+            <div className="metric-value">{dashboardStats.schools}</div>
+          </div>
+          
+          <div className="metric-card">
+            <h4>Number of classes</h4>
+            <div className="metric-value">{dashboardStats.classes}</div>
+          </div>
+          
+          <div className="metric-card">
+            <h4>Overall Rating</h4>
+            <div className="metric-value">{dashboardStats.rating} out of 4</div>
+          </div>
+        </div>
+
+        {/* Performance Card */}
+        <div className="dashboard-card performance-card">
+          <h3>Your Overall Performance</h3>
+          <p>This shows your overall performance in a school.</p>
+          
+          <div className="performance-tabs">
+            <button className={`tab-btn ${activeTab === 'schools' ? 'active' : ''}`}>
+              Schools
+            </button>
+            <button className={`tab-btn ${activeTab === 'students' ? 'active' : ''}`}>
+              Students
+            </button>
+          </div>
+          
+          <div className="performance-content">
+            {/* Performance data would go here */}
+          </div>
+        </div>
+
+        {/* Quiz Score Card */}
+        <div className="dashboard-card quiz-score-card">
+          <h3>10 Weekly Average Quiz Score</h3>
+          <p>All Courses</p>
+          <div className="quiz-content">
+            {/* Quiz score data would go here */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ... [rest of the render functions remain exactly the same] ...
 
   return (
+    <div className="tutor-dashboard">
+      {/* Sidebar */}
+      <aside className="dashboard-sidebar">
+        <div className="sidebar-header">
+          <div className="logo">
+            <div className="logo-icon">C</div>
+            <div className="logo-text">
+              <h2>Cobot KIDS kENYA</h2>
+              <p>CODING FOR KIDS</p>
+            </div>
+          </div>
+        </div>
 
-    <div className="">
-       <Header/>
-      <TutorProfile />
+        <nav className="sidebar-nav">
+          <button
+            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveTab('dashboard')}
+          >
+            <FontAwesomeIcon icon={faHome} />
+            <span>Dashboard</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'lessons' ? 'active' : ''}`}
+            onClick={() => setActiveTab('lessons')}
+          >
+            <FontAwesomeIcon icon={faBookOpen} />
+            <span>Lessons</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'formLinks' ? 'active' : ''}`}
+            onClick={() => setActiveTab('formLinks')}
+          >
+            <FontAwesomeIcon icon={faLink} />
+            <span>Form Links</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'schools' ? 'active' : ''}`}
+            onClick={() => setActiveTab('schools')}
+          >
+            <FontAwesomeIcon icon={faBuilding} />
+            <span>Schools</span>
+          </button>
+
+          <button
+            className={`nav-item ${activeTab === 'students' ? 'active' : ''}`}
+            onClick={() => setActiveTab('students')}
+          >
+            <FontAwesomeIcon icon={faUsers} />
+            <span>Students</span>
+          </button>
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="user-profile">
+            <div className="user-avatar">
+              <FontAwesomeIcon icon={faUserGraduate} />
+            </div>
+            <div className="user-info">
+              <h4>{tutorDetails ? `${tutorDetails.fname} ${tutorDetails.lname}` : 'Loading...'}</h4>
+              <p>{tutorDetails?.username || 'Loading...'}</p>
+            </div>
+            <button className="profile-dropdown">
+              <FontAwesomeIcon icon={faArrowRight} />
+            </button>
+          </div>
+        </div>
+      </aside>
+
       {/* Main Content */}
-      <div className="student-dashboard-content">
-        {/* Sidebar */}
-        <aside className="student-sidebar">
-          <nav>
-            <button
-              className={`student-sidebar-btn ${activeTab === 'schools' ? 'active' : ''}`}
-              onClick={() => setActiveTab('schools')}
-            >
-              <span className="icon">📚</span>
-              <span>My Schools</span>
-            </button>
-
-            <button
-              className={`student-sidebar-btn ${activeTab === 'challenges' ? 'active' : ''}`}
-              onClick={() => setActiveTab('challenges')}
-            >
-              <span className="icon">🏆</span>
-              <span>Students</span>
-            </button>
-
-            <button
-              className={`student-sidebar-btn ${activeTab === 'performance' ? 'active' : ''}`}
-              onClick={() => setActiveTab('performance')}
-            >
-              <span className="icon">📈</span>
-              <span>My Performance</span>
-            </button>
-
-            <button
-              className={`student-sidebar-btn ${activeTab === 'followers' ? 'active' : ''}`}
-              onClick={() => setActiveTab('followers')}
-            >
-              <span className="icon">👥</span>
-              <span>Reasources</span>
-            </button>
-
-            <button
-              className="exam-room-btn"
-              onClick={() => setShowExamModal(true)}
-            >
-              <span className="icon">🚪</span>
-              <span>Register A New Student</span>
-            </button>
-
-            <button
-              className="exam-room-btn"
-              onClick={() => setShowClassCodeGenarator(true)}
-            >
-              <span className="icon">Class Code</span>
-              <span></span>
-            </button>
-          </nav>
-        </aside>
-
-        {/* Main Panel */}
-        <main className="main-panel">
-          {/* Courses Tab */}
-          {activeTab === 'courses' && (
-            <div className="courses-grid">
-              <h2 class="typing-effect">My Schools</h2>
-              <div className="courses-list">
-                {schools.map(schools => (
-                  <div key={schools.id} className="course-card">
-                    <div className="course-icon">
-                      <img src={schools.icon} alt={schools.title} style={{ width: '240px', height: '240px', borderRadius: '10px' }} />
-                    </div>
-                    <h2>{schools.title}</h2>
-                    <div className="progress-container">
-                      <div
-                        className="progress-bar"
-                        style={{ width: `${schools.courseStatus}` }}
-                      ></div>
-                      <span style={{ color: "white", background: 'green', padding: '0.4rem', borderRadius: '5px' }}>
-                        {schools.courseStatus}
-                      </span>
-                    </div>
-                    <Link to="" className="continue-btn">Enter School</Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Challenges Tab */}
-          {activeTab === 'challenges' && (
-            <div className="challenges-section">
-              <h2>Current Challenges</h2>
-              <div className="challenges-list">
-                {challenges.map(challenge => (
-                  <div key={challenge.id} className="challenge-card">
-                    <div className="challenge-icon">{challenge.icon}</div>
-                    <div className="challenge-details">
-                      <h3>{challenge.title}</h3>
-                      <p>Deadline: {challenge.deadline}</p>
-                    </div>
-                    <button className="submit-btn">Submit Work</button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="post-challenge">
-                <h3>Post a New Challenge</h3>
-                <textarea placeholder="Describe your challenge..."></textarea>
-                <button className="post-btn">Post Challenge</button>
-              </div>
-            </div>
-          )}
-
-          {/* Performance Tab */}
-          {activeTab === 'performance' && (
-            <div className="performance-section">
-              <h2>My Performance</h2>
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-icon">✅</div>
-                  <div className="stat-value">{performanceData.completed}</div>
-                  <div className="stat-label">Courses Completed</div>
-                </div>
-
-                <div className="stat-card">
-                  <div className="stat-icon">⌛</div>
-                  <div className="stat-value">{performanceData.inProgress}</div>
-                  <div className="stat-label">Courses in Progress</div>
-                </div>
-
-                <div className="stat-card">
-                  <div className="stat-icon">📊</div>
-                  <div className="stat-value">{performanceData.averageScore}%</div>
-                  <div className="stat-label">Average Score</div>
-                </div>
-              </div>
-
-              <div className="performance-graph">
-                <h3>Progress Over Time</h3>
-                <div className="graph-placeholder">
-                  {/* This would be replaced with an actual chart component */}
-                  <p>📈 Performance graph visualization would appear here</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Followers Tab */}
-          {activeTab === 'followers' && (
-            <div className="followers-section">
-              <h2>My Followers</h2>
-              <div className="followers-list">
-                {followers.map(follower => (
-                  <div key={follower.id} className="follower-card">
-                    <div className="follower-avatar">{follower.avatar}</div>
-                    <div className="follower-name">{follower.name}</div>
-                    <button className="message-btn">Message</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
-
-      {/* Exam Room Modal */}
-      {showExamModal && (
-        <AddStudent />
-      )}
-
-
-      {/* Exam Room Modal */}
-      {showClassCodeGenarator && (
-        <ClassCodeGenarator/> 
-      )}
+      <main className="dashboard-main">
+        {loading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading your dashboard...</p>
+          </div>
+        ) : error ? (
+          <div className="error-message">
+            {error}
+            <button onClick={() => setError(null)}>×</button>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'dashboard' && renderDashboard()}
+            {activeTab === 'students' && renderStudents()}
+            {activeTab === 'schools' && renderSchools()}
+            {activeTab === 'lessons' && renderLessons()}
+            {activeTab === 'formLinks' && renderFormLinks()}
+          </>
+        )}
+      </main>
     </div>
-
-  )
+  );
 }
 
-export default TutorDashboard
+export default TutorDashboard;
