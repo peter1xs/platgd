@@ -19,21 +19,7 @@ const StudentDashBoard= () => {
   const [examJoinError, setExamJoinError] = useState("");
   const navigate = useNavigate();
 
-  const challenges = [
-    { id: 1, title: "Build a Calculator", deadline: "2023-12-15", icon: "🧮" },
-  ];
 
-  const performanceData = {
-    completed: 12,
-    inProgress: 5,
-    averageScore: 84,
-  };
-
-  const followers = [
-    { id: 1, name: "Alex Johnson", avatar: "👨‍💻" },
-    { id: 2, name: "Samira Khan", avatar: "👩‍🎓" },
-    { id: 3, name: "Taylor Wong", avatar: "👨‍🔬" },
-  ];
 
   // Fetch courses from backend when component mounts
   useEffect(() => {
@@ -232,9 +218,7 @@ const StudentDashBoard= () => {
           {/* Courses Tab */}
           {activeTab === "courses" && (
             <div className="student-courses-grid">
-              <h2 className="student-courses-title">
-                <span class="typing-effect">My Courses</span>
-              </h2>
+              
               <div className="student-courses">
                 {courses.map((course) => (
                   <div
@@ -299,12 +283,12 @@ const StudentDashBoard= () => {
       {/* Class Code Modal */}
       {showClassCodeModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="overlay-modal-content">
             <h2>Enter Class Code</h2>
             <p>Please enter the class code provided by your tutor to access this course.</p>
             
             <form onSubmit={handleClassCodeSubmit}>
-              <div className="form-group">
+              <div className="modal-form-group">
                 <label htmlFor="classCode">Class Code:</label>
                 <input
                   type="text"
@@ -321,7 +305,7 @@ const StudentDashBoard= () => {
                 )}
               </div>
               
-              <div className="modal-buttons">
+              <div className="overlay-modal-buttons">
                 <button
                   type="button"
                   className="cancel-btn"
@@ -341,11 +325,11 @@ const StudentDashBoard= () => {
       {/* Exam Modal */}
       {showExamModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Enter Exam Room</h2>
+          <div className="overlay-modal-content">
+            <h1>Enter Exam Room</h1>
             <p>Please enter your exam code to proceed.</p>
             <form onSubmit={handleExamSubmit}>
-              <div className="form-group">
+              <div className="modal-form-group">
                 <label htmlFor="examCode">Exam Code:</label>
                 <input
                   type="text"
@@ -360,15 +344,13 @@ const StudentDashBoard= () => {
                   <span className="error-message">{examJoinError}</span>
                 )}
               </div>
-              <div className="modal-buttons">
+              <div className="overlay-modal-buttons">
                 <button type="button" className="cancel-btn" onClick={() => setShowExamModal(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="submit-btn">Join Exam</button>
               </div>
-              <div className="modal-buttons">
-                {/* extra buttons kept for layout consistency */}
-              </div>
+              
             </form>
           </div>
         </div>
