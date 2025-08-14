@@ -27,7 +27,7 @@ import {
 import './styles/TutorDashboard.css';
 
 function TutorDashboard() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard');  
   const [showSelfRegistration, setShowSelfRegistration] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('Bright gift School');
@@ -240,6 +240,219 @@ function TutorDashboard() {
   );
 
   // ... [rest of the render functions remain exactly the same] ...
+  const renderStudents = () => (
+    <div className="students-management">
+      <h1>Student Management</h1>
+      
+      <div className="filters-section">
+        <div className="filter-row">
+          <select 
+            value={selectedSchool} 
+            onChange={(e) => setSelectedSchool(e.target.value)}
+            className="filter-select"
+          >
+            <option value="Bright gift School">Bright gift School</option>
+            <option value="GraceLand School">GraceLand School</option>
+          </select>
+          
+          <select 
+            value={selectedClass} 
+            onChange={(e) => setSelectedClass(e.target.value)}
+            className="filter-select"
+          >
+            <option value="Grade 7 wisdom">Grade 7 wisdom</option>
+            <option value="Grade 8 wisdom">Grade 8 wisdom</option>
+          </select>
+          
+          <div className="search-box">
+            <FontAwesomeIcon icon={faSearch} />
+            <input
+              type="text"
+              placeholder="Search by name or username"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div className="filter-row">
+          <button className="filter-btn">
+            <FontAwesomeIcon icon={faFilter} />
+            Filter by Performance Rating
+          </button>
+          
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value)}
+            className="filter-select"
+          >
+            <option value="name">Sort By</option>
+            <option value="performance">Performance</option>
+            <option value="lastLogin">Last Login</option>
+          </select>
+          
+          <select 
+            value={sortOrder} 
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="filter-select"
+          >
+            <option value="asc">Order</option>
+            <option value="desc">Descending</option>
+          </select>
+          
+          <button className="reset-btn" onClick={resetFilters}>
+            <FontAwesomeIcon icon={faUndo} />
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div className="students-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>Username</th>
+              <th>School</th>
+              <th>Class</th>
+              <th>Performance Rating</th>
+              <th>Last login</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map(student => (
+              <tr key={student.id}>
+                <td>
+                  <Link to={`/student/${student.id}`} className="student-name">
+                    {student.name}
+                  </Link>
+                </td>
+                <td>{student.gender}</td>
+                <td>{student.username}</td>
+                <td>{student.school}</td>
+                <td>{student.class}</td>
+                <td>
+                  <span className="performance-badge">
+                    <FontAwesomeIcon icon={faStar} />
+                    {student.performance}
+                  </span>
+                </td>
+                <td>{student.lastLogin}</td>
+                <td>
+                  <button className="action-btn">
+                    <FontAwesomeIcon icon={faEllipsisV} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderSchools = () => (
+    <div className="schools-management">
+      <h1>School List</h1>
+      <p>Here is a list of all the schools you have been assigned to</p>
+      
+      <div className="search-section">
+        <div className="search-box">
+          <FontAwesomeIcon icon={faSearch} />
+          <input
+            type="text"
+            placeholder="Search schools..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {schools.length > 0 ? (
+        <div className="schools-grid">
+          {schools.map(school => (
+            <div key={school.id} className="school-card">
+              <div className="school-icon">
+                <FontAwesomeIcon icon={faBuilding} />
+              </div>
+              <h3>{school.name}</h3>
+              <p>{school.location}</p>
+              <div className="school-stats">
+                <span>{school.students} Students</span>
+                <span className={`status ${school.status.toLowerCase()}`}>
+                  {school.status}
+                </span>
+              </div>
+              <button className="view-school-btn">
+                View Details
+                <FontAwesomeIcon icon={faArrowRight} />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="empty-state">
+          <FontAwesomeIcon icon={faExclamationCircle} />
+          <p>No Schools found</p>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderLessons = () => (
+    <div className="lessons-management">
+      <h1>Classes</h1>
+
+      {assignmentsLoading && (
+        <div className="empty-state"><p>Loading your classes...</p></div>
+      )}
+      {assignmentsError && (
+        <div className="empty-state"><p>{assignmentsError}</p></div>
+      )}
+
+      {!assignmentsLoading && !assignmentsError && (
+        assignments?.length > 0 ? (
+          <div className="lessons-grid">
+            {assignments.map(assign => (
+              (assign.classes || []).filter(c => c.isActive).map(cls => (
+                <div key={`${assign.schoolId}-${cls.classId}`} className="lesson-card">
+                  <div className="lesson-icon">
+                    <FontAwesomeIcon icon={faBookOpen} />
+                  </div>
+                  <h3>{cls.className || 'Unnamed Class'}</h3>
+                  <p>{assign.schoolName} ({assign.schoolCode})</p>
+                  {recentCodes[cls.classId] ? (
+                    <p>Current Code: <strong>{recentCodes[cls.classId].code}</strong></p>
+                  ) : null}
+                  <button className="view-school-btn" onClick={() => handleGenerateClassCode(assign.schoolId, cls.classId)}>
+                    Generate Class Code
+                  </button>
+                </div>
+              ))
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <FontAwesomeIcon icon={faExclamationCircle} />
+            <p>No classes found for your assignments</p>
+          </div>
+        )
+      )}
+    </div>
+  );
+
+  const renderFormLinks = () => (
+    <div className="form-links-management">
+      <h1>Form Links</h1>
+      <div className="empty-state">
+        <FontAwesomeIcon icon={faExclamationCircle} />
+        <p>No form links available</p>
+      </div>
+    </div>
+  );
+
 
   return (
     <div className="tutor-dashboard">
