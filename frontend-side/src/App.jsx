@@ -35,7 +35,7 @@ import ExamsPage from "./platforms/admin/pages/exams/page";
 import ExamDetailPage from "./platforms/admin/pages/exams/detail";
 import TutorAssignmentsPage from "./platforms/admin/pages/tutorAssignments/page";
 import ClassCodesPage from "./platforms/admin/pages/classCodes/page";
-import DashboardOverview from "./components/TutorDashboard/SchoolsManagement";
+// import DashboardOverview from "./components/TutorDashboard/SchoolsManagement";
 // school import
 import SchoolAuth from "./components/SchoolAuth";
 import AssignmentsPage from "./platforms/admin/pages/assignments/page";
@@ -75,7 +75,7 @@ const router = createBrowserRouter([
   { path: "/tutorAssignments", element: <TutorAssignmentsPage /> },
   { path: "/classCodes", element: <ClassCodesPage /> },
   { path: "/course/:courseId", element: <CourseDetail /> },
-  {path: "/tutor-dashboard", element: <DashboardOverview/>},
+  // {path: "/tutor-dashboard", element: <DashboardOverview/>},
   {path: "/assignments", element: <AssignmentsPage />},
 ]);
 
