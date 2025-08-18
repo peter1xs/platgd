@@ -7,6 +7,9 @@ function StudentProfile() {
   const [courseData, setCourseData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false);
+  const [avatarUrlInput, setAvatarUrlInput] = useState("");
+  const [savingAvatar, setSavingAvatar] = useState(false);
   const [courseStats, setCourseStats] = useState({
     total: 0,
     completed: 0,
@@ -30,6 +33,7 @@ function StudentProfile() {
         }
 
         setStudentData(studentResponse.data.student);
+        setAvatarUrlInput(studentResponse.data.student?.profileImage || "");
 
         // Fetch all courses from the database
         const coursesResponse = await axios.get(
@@ -91,15 +95,64 @@ function StudentProfile() {
     return `${Math.round((present / total) * 100)}%`;
   };
 
+  const handleAvatarClick = () => {
+    setIsEditingAvatar(true);
+  };
+
+  const handleSaveAvatar = async () => {
+    try {
+      const studentId = localStorage.getItem("studentId");
+      if (!studentId) throw new Error("No student ID found");
+      setSavingAvatar(true);
+      const res = await axios.put(
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/students/${studentId}`,
+        { profileImage: avatarUrlInput?.trim() || null }
+      );
+      if (res.data?.success) {
+        setStudentData(prev => ({ ...prev, profileImage: avatarUrlInput?.trim() || null }));
+        setIsEditingAvatar(false);
+      } else {
+        throw new Error(res.data?.error || "Failed to update avatar");
+      }
+    } catch (e) {
+      alert(e.message || "Failed to save avatar");
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
+
   return (
     <div className="student-profile-card">
       <div className="student-profile-info">
-        <div className="student-profile-pic">
-          <i className="fas fa-user-astronaut student-profile-icon"></i>
+        <div className="student-profile-pic" onClick={handleAvatarClick}>
+          {studentData.profileImage ? (
+            <img src={studentData.profileImage} alt="Avatar" className="student-avatar-img" />
+          ) : (
+            <i className="fas fa-user-astronaut student-profile-icon"></i>
+          )}
           <div className="student-upload-indicator">
             <i className="fas fa-camera"></i>
           </div>
-          <div className="student-profile-text">Add Photo</div>
+          <div className="student-profile-text">{studentData.profileImage ? 'Change Photo' : 'Add Photo'}</div>
+          {isEditingAvatar && (
+            <div className="avatar-input-overlay" onClick={e => e.stopPropagation()}>
+              <input
+                type="url"
+                placeholder="Paste image URL"
+                value={avatarUrlInput}
+                onChange={e => setAvatarUrlInput(e.target.value)}
+                className="avatar-url-input"
+              />
+              <div className="avatar-actions">
+                <button className="avatar-btn save" onClick={handleSaveAvatar} disabled={savingAvatar}>
+                  {savingAvatar ? 'Saving...' : 'Save'}
+                </button>
+                <button className="avatar-btn cancel" onClick={() => setIsEditingAvatar(false)} disabled={savingAvatar}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="student-profile-info-text">

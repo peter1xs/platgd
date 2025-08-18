@@ -1190,6 +1190,55 @@ app.get('/cobotKidsKenya/students/:studentId', async (req, res) => {
     }
 });
 
+// Update student profile fields (e.g., profileImage)
+app.put('/cobotKidsKenya/students/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { profileImage } = req.body;
+
+    if (!studentId || !mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ success: false, error: 'Invalid student ID format' });
+    }
+
+    if (profileImage !== undefined && typeof profileImage !== 'string') {
+      return res.status(400).json({ success: false, error: 'profileImage must be a string URL or null' });
+    }
+
+    // Find the school and class containing this student
+    const school = await School.findOne({ 'classes.students._id': studentId });
+    if (!school) {
+      return res.status(404).json({ success: false, error: 'Student not found' });
+    }
+
+    let updatedStudent = null;
+    for (const classroom of school.classes) {
+      const student = classroom.students.id(studentId);
+      if (student) {
+        if (profileImage !== undefined) {
+          student.profileImage = profileImage || null;
+        }
+        updatedStudent = student;
+        break;
+      }
+    }
+
+    if (!updatedStudent) {
+      return res.status(404).json({ success: false, error: 'Student not found in classes' });
+    }
+
+    await school.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Student updated successfully',
+      student: updatedStudent
+    });
+  } catch (error) {
+    console.error('Error updating student:', error);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 
 
 

@@ -62,6 +62,10 @@ const studentSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     min: [0, 'Points cannot be negative']
+  },
+  profileImage: {
+    type: String,
+    default: null
   }
 }, { _id: true, timestamps: true });
 
