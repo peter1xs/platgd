@@ -12,11 +12,11 @@
 
 .magic-button {
   display: inline-block;
-  padding: 12px 28px;
+  padding: 5px 18px;
   border-radius: 10px;
   background: linear-gradient(135deg, #007BFF,#0055CC);
   color: #fff;
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
   box-shadow: 0 8px 20px #FF6600;
@@ -46,4 +46,28 @@
 .magic-button:hover {
   transform: scale(1.05);
   box-shadow: 0 10px 30px #FF6600;
+}
+
+
+
+
+
+
+
+/* code btn */
+
+
+.code-button {
+  display: inline-block;
+  padding: 5px 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #FF6600,#0055CC);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px #FF6600;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
 }

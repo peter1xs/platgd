@@ -5,7 +5,7 @@ import ComingSoon from "../../../components/comingSoon/ComingSoon";
 import Header from "../components/header/Header";
 import { useNavigate } from "react-router-dom";
 
-const StudentDashBoard= () => {
+const StudentDashBoard = () => {
   const [activeTab, setActiveTab] = useState("courses");
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,8 +18,6 @@ const StudentDashBoard= () => {
   const [examCode, setExamCode] = useState("");
   const [examJoinError, setExamJoinError] = useState("");
   const navigate = useNavigate();
-
-
 
   // Fetch courses from backend when component mounts
   useEffect(() => {
@@ -53,7 +51,7 @@ const StudentDashBoard= () => {
 
   const handleClassCodeSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!classCode.trim()) {
       setClassCodeError("Please enter a class code");
       return;
@@ -61,28 +59,31 @@ const StudentDashBoard= () => {
 
     try {
       // Verify class code with backend
-      const response = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/verifyClassCode`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          classCode: classCode.trim(),
-          courseId: selectedCourse._id,
-          studentId: localStorage.getItem("studentId")
-        })
-      });
+      const response = await fetch(
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/verifyClassCode`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            classCode: classCode.trim(),
+            courseId: selectedCourse._id,
+            studentId: localStorage.getItem("studentId"),
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (data.success) {
         setShowClassCodeModal(false);
         // Navigate to course details page
-        navigate(`/course/${selectedCourse._id}`, { 
-          state: { 
+        navigate(`/course/${selectedCourse._id}`, {
+          state: {
             course: selectedCourse,
-            classCode: classCode.trim()
-          }
+            classCode: classCode.trim(),
+          },
         });
       } else {
         setClassCodeError(data.error || "Invalid class code");
@@ -105,7 +106,11 @@ const StudentDashBoard= () => {
 
     try {
       // 1) Resolve code to exam
-      const res = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/exams/code/${encodeURIComponent(trimmed)}`);
+      const res = await fetch(
+        `https://platform-zl0a.onrender.com/cobotKidsKenya/exams/code/${encodeURIComponent(
+          trimmed
+        )}`
+      );
       const data = await res.json();
       if (!data.success) {
         setExamJoinError(data.error || "Invalid exam code");
@@ -122,13 +127,18 @@ const StudentDashBoard= () => {
       }
 
       // Some servers may include attempts; register only if you are not already there
-      const alreadyRegistered = Array.isArray(exam.attempts) && exam.attempts.some(a => a.student === studentId);
+      const alreadyRegistered =
+        Array.isArray(exam.attempts) &&
+        exam.attempts.some((a) => a.student === studentId);
       if (!alreadyRegistered) {
-        const regRes = await fetch(`https://platform-zl0a.onrender.com/cobotKidsKenya/exams/${exam._id}/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentId, examCode: trimmed })
-        });
+        const regRes = await fetch(
+          `https://platform-zl0a.onrender.com/cobotKidsKenya/exams/${exam._id}/register`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ studentId, examCode: trimmed }),
+          }
+        );
         const regData = await regRes.json();
         if (!regData.success) {
           setExamJoinError(regData.error || "Failed to register for the exam");
@@ -137,8 +147,8 @@ const StudentDashBoard= () => {
       }
 
       // 3) Navigate to ExamRoom
-    setShowExamModal(false);
-    setExamCode("");
+      setShowExamModal(false);
+      setExamCode("");
       navigate(`/ExamRoom?examId=${exam._id}`);
     } catch (err) {
       console.error("Exam join error:", err);
@@ -165,13 +175,13 @@ const StudentDashBoard= () => {
   return (
     <div className="student-dashboard-container">
       {/* Header */}
-         <Header/>
-       <StudentProfile />
+      <Header />
+      <StudentProfile />
 
       {/* Main Content */}
       <div className="student-student-navigation">
         {/* Sidebar */}
-       <aside className="student-navigation-sidebar">
+        <aside className="student-navigation-sidebar">
           <nav>
             <button
               className={`student-navigation-btn ${
@@ -179,7 +189,9 @@ const StudentDashBoard= () => {
               }`}
               onClick={() => setActiveTab("courses")}
             >
-              <span className="icon"><i class="fa-solid fa-chalkboard-user"></i></span>
+              <span className="icon">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </span>
               <span className="icon-name">All Courses</span>
             </button>
 
@@ -189,7 +201,9 @@ const StudentDashBoard= () => {
               }`}
               onClick={() => setActiveTab("challenges")}
             >
-              <span className="icon"><i class="fa-solid fa-chalkboard"></i></span>
+              <span className="icon">
+                <i class="fa-solid fa-chalkboard"></i>
+              </span>
               <span className="icon-name">Challenges</span>
             </button>
 
@@ -199,7 +213,9 @@ const StudentDashBoard= () => {
               }`}
               onClick={() => setActiveTab("performance")}
             >
-              <span className="icon"><i class="fa-solid fa-graduation-cap"></i></span>
+              <span className="icon">
+                <i class="fa-solid fa-graduation-cap"></i>
+              </span>
               <span className="icon-name">My Performance</span>
             </button>
 
@@ -207,7 +223,9 @@ const StudentDashBoard= () => {
               className="student-exam-room-btn"
               onClick={() => setShowExamModal(true)}
             >
-              <span className="icon"><i class="fa-solid fa-door-open"></i></span>
+              <span className="icon">
+                <i class="fa-solid fa-door-open"></i>
+              </span>
               <span className="icon-name">Enter Exam Room</span>
             </button>
           </nav>
@@ -216,48 +234,65 @@ const StudentDashBoard= () => {
         {/* Main Panel */}
         <main className="main-panel">
           {/* Courses Tab */}
-          {activeTab === "courses" && (
-            <div className="student-courses-grid">
-              
-              <div className="student-courses">
-                {courses.map((course) => (
-                  <div
-                    key={course._id || course.id}
-                    className="student-animated-course-card"
-                    onClick={() => handleCourseClick(course)}
-                  >
-                    <div className="card-image-box">
-                      <img
-                        src={course.courseIcon}
-                        alt={course.courseName}
-                        className="card-image"
-                      />
-                      <div  
-                        className="card-progress"
-                        style={{
-                          width:
-                            course.status === "completed"
-                              ? "100%"
-                              : course.status === "enrolled"
-                              ? "50%"
-                              : "0%",
-                        }}
-                      ></div>
-                    </div>
-                    <h3 className="card-title">{course.courseName}</h3>
-                    <div className="card-badges">
-                      <span
-                        className={`student-badge status ${course.status.toLowerCase()}`}
-                      >
-                        {course.status}
-                      </span>
-                      <span className="student-badge code"> {course.code}</span>
-                    </div>
-                  </div>
-                ))}
+          <div className="student-courses-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 auto-rows-fr">
+            {courses.map((course) => (
+              <div
+                key={course._id || course.id}
+                onClick={() => handleCourseClick(course)}
+                className="magic-button 
+                 animate-[wiggle_3s_ease-in-out_infinite]"
+              >
+                
+                {/* Status badge */}
+                <span
+                  className={`status-button${
+                    course.status === "completed"
+                      ? "bg-green-500/90 text-white hover:bg-green-600"
+                      : course.status === "enrolled"
+                      ? "bg-yellow-400/90 text-gray-900 hover:bg-yellow-500"
+                      : "bg-gray-400/80 text-white hover:bg-gray-500"
+                  }`}
+                >
+                  {course.status}
+                </span>
+                {/* Course image */}
+                <img
+                  src={course.courseIcon}
+                  alt={course.courseName}
+                  className="rounded-t-lg "
+                />
+                <div class="p-5">
+                  {/* Course name */}
+                  <h3 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    {course.courseName}
+                  </h3>
+                </div>
+
+                {/* Badges */}
+                <div className="flex gap-2 mt-3 justify-center">
+                  {/* Code badge */}
+                  <span className="code-button">
+                    {course.code}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
+
+          <style>
+            {`
+@keyframes wiggle {
+  0%, 7% { transform: rotateZ(0); }
+  15% { transform: rotateZ(-3deg); }
+  20% { transform: rotateZ(3deg); }
+  25% { transform: rotateZ(-3deg); }
+  30% { transform: rotateZ(3deg); }
+  35% { transform: rotateZ(-3deg); }
+  40%, 100% { transform: rotateZ(0); }
+}
+`}
+          </style>
+
           {/* Challenges Tab */}
           {activeTab === "challenges" && (
             <div className="challenges-section">
@@ -285,8 +320,11 @@ const StudentDashBoard= () => {
         <div className="modal-overlay">
           <div className="overlay-modal-content">
             <h2>Enter Class Code</h2>
-            <p>Please enter the class code provided by your tutor to access this course.</p>
-            
+            <p>
+              Please enter the class code provided by your tutor to access this
+              course.
+            </p>
+
             <form onSubmit={handleClassCodeSubmit}>
               <div className="modal-form-group">
                 <label htmlFor="classCode">Class Code:</label>
@@ -304,7 +342,7 @@ const StudentDashBoard= () => {
                   <span className="error-message">{classCodeError}</span>
                 )}
               </div>
-              
+
               <div className="overlay-modal-buttons">
                 <button
                   type="button"
@@ -345,12 +383,17 @@ const StudentDashBoard= () => {
                 )}
               </div>
               <div className="overlay-modal-buttons">
-                <button type="button" className="cancel-btn" onClick={() => setShowExamModal(false)}>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => setShowExamModal(false)}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="submit-btn">Join Exam</button>
+                <button type="submit" className="submit-btn">
+                  Join Exam
+                </button>
               </div>
-              
             </form>
           </div>
         </div>
@@ -359,4 +402,4 @@ const StudentDashBoard= () => {
   );
 };
 
-export default StudentDashBoard;      
+export default StudentDashBoard;
