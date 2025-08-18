@@ -40,12 +40,12 @@ const CourseDetail = () => {
 
   const openNotesOverlay = (topic) => {
     setSelectedTopic(topic);
-    setCurrentOverlay('notes');
+    setCurrentOverlay("notes");
   };
 
   const openAssignmentOverlay = (topic) => {
     setSelectedTopic(topic);
-    setCurrentOverlay('assignment');
+    setCurrentOverlay("assignment");
   };
 
   const closeOverlay = () => {
@@ -79,9 +79,6 @@ const CourseDetail = () => {
       <div className="course-detail-container">
         <Header />
         <div className="error">Course not found</div>
-        <button className="back-btn" onClick={() => navigate("/")}>
-          ← Back to Home
-        </button>
       </div>
     );
   }
@@ -145,55 +142,67 @@ const CourseDetail = () => {
         </div>
 
         {/* Notes Overlay */}
-        {currentOverlay === 'notes' && selectedTopic && (
+        {currentOverlay === "notes" && selectedTopic && (
           <div className="overlay">
-            <button className="note-close-btn" onClick={closeOverlay}>Back TO TOPICS</button>
+            <button className="note-close-btn" onClick={closeOverlay}>
+              Back TO TOPICS
+            </button>
             <div className="overlay-content">
-              
               <h2>Notes for: {selectedTopic.name}</h2>
               <div className="notes-list">
                 {selectedTopic.notes?.length > 0 ? (
                   selectedTopic.notes.map((note, index) => (
                     <div key={index} className="note-item">
-                      <h3>Note {index + 1}</h3>
-                      <p>{note.content}</p>
-                      {note.images?.length > 0 && (
-                        <div className="note-images">
-                          {note.images.map((img, i) => (
-                            <img key={i} src={img} alt={`Note ${index+1} image ${i+1}`} />
-                          ))}
+                      <h3>Topic {index + 1}</h3>
+                      <div className="note-content">
+                        <div>
+                          {/* <p>Lorem ipsu repudiandae incidunt cumque quam corporis, vel distinctio? Esse soluta iure numquam recusandae sit maxime excepturi, quae repellat nobis aliquam architecto enim consectetur velit facere ut rem tempora.</p> */}
+                          <p>{note.content}</p>
                         </div>
-                        
-                      )}
+                        <div>
+                          {note.images?.length > 0 && (
+                            <div className="note-images">
+                              {note.images.map((img, i) => (
+                                <img
+                                  key={i}
+                                  src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzByYTNjZnNkM2FsN2pyMnA4eTgwZ3FvMWlwYTkwYXVzN2ppcmU0ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/uwE0bmgRskj4T2sasc/giphy.gif"
+                                  alt={`Note ${index + 1} image ${i + 1}`}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    
                   ))
                 ) : (
                   <p>No notes available for this topic.</p>
                 )}
               </div>
               {/* Course Link Button at bottom of Notes Overlay */}
-      {course.courseLink && (
-        <div className="overlay-footer">
-          <a
-            href={course.courseLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="course-link-btn"
-          >
-            Open Course Materials
-          </a>
-        </div>
-      )}
+              {course.courseLink && (
+                <div className="overlay-footer">
+                  <a
+                    href={course.courseLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="course-link-btn"
+                  >
+                    Go To {selectedTopic.name}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Assignment Overlay */}
-        {currentOverlay === 'assignment' && selectedTopic && (
+        {currentOverlay === "assignment" && selectedTopic && (
           <div className="overlay">
             <div className="overlay-content">
-              <button className="close-btn" onClick={closeOverlay}>×</button>
+              <button className="close-btn" onClick={closeOverlay}>
+                ×
+              </button>
               <h2>Assignment for: {selectedTopic.name}</h2>
               <div className="assignment-content">
                 {selectedTopic.coursework?.length > 0 ? (
@@ -202,7 +211,10 @@ const CourseDetail = () => {
                       <h3>Assignment {index + 1}</h3>
                       <p>{assignment.content}</p>
                       <div className="assignment-meta">
-                        <span>Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
+                        <span>
+                          Due:{" "}
+                          {new Date(assignment.dueDate).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   ))
