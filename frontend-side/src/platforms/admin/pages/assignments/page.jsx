@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import './Assignments.css';
 
+const API_BASE = 'https://platform-zl0a.onrender.com/cobotKidsKenya';
+
 const AssessmentsPage = () => {
   const [assessments, setAssessments] = useState([]);
   const [courses, setCourses] = useState([]);
   const [topics, setTopics] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState({
+    assessments: true,
+    courses: false,
+    topics: false
+  });
+  const [error, setError] = useState({
+    assessments: null,
+    courses: null,
+    topics: null
+  });
   const [showForm, setShowForm] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState(null);
   const [selectedAssessment, setSelectedAssessment] = useState(null);
@@ -41,8 +51,10 @@ const AssessmentsPage = () => {
 
   const fetchAssessments = async () => {
     try {
-      setLoading(true);
-      const response = await fetch('/cobotKidsKenya/assessments');
+      setLoading(prev => ({ ...prev, assessments: true }));
+      setError(prev => ({ ...prev, assessments: null }));
+      
+      const response = await fetch(`${API_BASE}/assessments`);
       const data = await response.json();
       
       if (data.success) {
@@ -53,50 +65,74 @@ const AssessmentsPage = () => {
         ];
         setAssessments(allAssessments);
       } else {
-        setError(data.error);
+        setError(prev => ({ ...prev, assessments: data.error }));
       }
     } catch (err) {
-      setError('Failed to fetch assessments');
+      setError(prev => ({ ...prev, assessments: 'Failed to fetch assessments' }));
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, assessments: false }));
     }
   };
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/cobotKidsKenya/courses');
+      setLoading(prev => ({ ...prev, courses: true }));
+      setError(prev => ({ ...prev, courses: null }));
+      
+      const response = await fetch(`${API_BASE}/courses`);
       const data = await response.json();
       
-      if (data.success) {
-        setCourses(data.data);
+      // Check if the response structure matches the second example
+      if (Array.isArray(data)) {
+        // Response is an array of courses (like in the second example)
+        setCourses(data);
+      } else if (data.success) {
+        // Response has a success property with data array
+        setCourses(data.data || []);
+      } else {
+        setError(prev => ({ ...prev, courses: data.error || 'Invalid response format' }));
       }
     } catch (err) {
+      setError(prev => ({ ...prev, courses: 'Failed to fetch courses' }));
       console.error('Failed to fetch courses:', err);
+    } finally {
+      setLoading(prev => ({ ...prev, courses: false }));
     }
   };
 
   const fetchTopics = async (courseId) => {
-    if (!courseId) return;
+    if (!courseId) {
+      setTopics([]);
+      return;
+    }
     
     try {
-      const response = await fetch(`/cobotKidsKenya/courses/${courseId}`);
+      setLoading(prev => ({ ...prev, topics: true }));
+      setError(prev => ({ ...prev, topics: null }));
+      
+      const response = await fetch(`${API_BASE}/courses/${courseId}/topics`);
       const data = await response.json();
       
       if (data.success) {
-        setTopics(data.data.topics || []);
+        setTopics(data.data || []);
+      } else {
+        setError(prev => ({ ...prev, topics: data.error }));
       }
     } catch (err) {
-      console.error('Failed to fetch topics:', err);
+      setError(prev => ({ ...prev, topics: 'Failed to fetch topics' }));
+    } finally {
+      setLoading(prev => ({ ...prev, topics: false }));
     }
   };
 
+  // Rest of the component remains the same...
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const endpoint = assessmentType === 'assignment' ? 'assignments' : 'exams';
       const url = editingAssessment 
-        ? `/cobotKidsKenya/${endpoint}/${editingAssessment._id}`
-        : `/cobotKidsKenya/${endpoint}`;
+        ? `${API_BASE}/${endpoint}/${editingAssessment._id}`
+        : `${API_BASE}/${endpoint}`;
       
       const method = editingAssessment ? 'PUT' : 'POST';
       
@@ -138,10 +174,10 @@ const AssessmentsPage = () => {
         resetForm();
         fetchAssessments();
       } else {
-        setError(data.error);
+        setError(prev => ({ ...prev, assessments: data.error }));
       }
     } catch (err) {
-      setError('Failed to save assessment');
+      setError(prev => ({ ...prev, assessments: 'Failed to save assessment' }));
     }
   };
 
@@ -175,7 +211,7 @@ const AssessmentsPage = () => {
     if (window.confirm('Are you sure you want to delete this assessment?')) {
       try {
         const endpoint = type === 'assignment' ? 'assignments' : 'exams';
-        const response = await fetch(`/cobotKidsKenya/${endpoint}/${assessmentId}`, {
+        const response = await fetch(`${API_BASE}/${endpoint}/${assessmentId}`, {
           method: 'DELETE',
         });
 
@@ -184,10 +220,10 @@ const AssessmentsPage = () => {
         if (data.success) {
           fetchAssessments();
         } else {
-          setError(data.error);
+          setError(prev => ({ ...prev, assessments: data.error }));
         }
       } catch (err) {
-        setError('Failed to delete assessment');
+        setError(prev => ({ ...prev, assessments: 'Failed to delete assessment' }));
       }
     }
   };
@@ -228,7 +264,7 @@ const AssessmentsPage = () => {
     return new Date() > new Date(dueDate);
   };
 
-  if (loading) {
+  if (loading.assessments) {
     return (
       <div className="assignments-loading">
         <div className="loading-spinner"></div>
@@ -265,12 +301,46 @@ const AssessmentsPage = () => {
         </button>
       </div>
 
-      {error && (
-        <div className="error-message">
-          <span>{error}</span>
-          <button onClick={() => setError(null)}>×</button>
-        </div>
-      )}
+ {Object.values(error).some(err => err) && (
+  <div className="error-messages">
+    {error.assessments && (
+      <div className="error-message">
+        <span>Assessments: {error.assessments}</span>
+        <button
+          onClick={() =>
+            setError(prev => ({ ...prev, assessments: null }))
+          }
+        >
+          &times;
+        </button>
+      </div>
+    )}
+    {error.courses && (
+      <div className="error-message">
+        <span>Courses: {error.courses}</span>
+        <button
+          onClick={() =>
+            setError(prev => ({ ...prev, courses: null }))
+          }
+        >
+          &times;
+        </button>
+      </div>
+    )}
+    {error.topics && (
+      <div className="error-message">
+        <span>Topics: {error.topics}</span>
+        <button
+          onClick={() =>
+            setError(prev => ({ ...prev, topics: null }))
+          }
+        >
+          &times;
+        </button>
+      </div>
+    )}
+  </div>
+)}
 
       {/* Assessment Form Modal */}
       {showForm && (
@@ -344,13 +414,14 @@ const AssessmentsPage = () => {
                     }}
                     required
                   >
-                    <option value="">Select Course</option>
+                    <option value="">Choose a course</option>
                     {courses.map(course => (
                       <option key={course._id} value={course._id}>
-                        {course.courseName}
+                        {course.courseName} ({course.code})
                       </option>
                     ))}
                   </select>
+                  {loading.courses && <div className="loading-indicator">Loading courses...</div>}
                 </div>
                 <div className="form-group">
                   <label>Topic *</label>
@@ -359,7 +430,7 @@ const AssessmentsPage = () => {
                     value={formData.topic}
                     onChange={(e) => setFormData({...formData, topic: e.target.value})}
                     required
-                    disabled={!formData.course}
+                    disabled={!formData.course || loading.topics}
                   >
                     <option value="">Select Topic</option>
                     {topics.map(topic => (
@@ -368,6 +439,7 @@ const AssessmentsPage = () => {
                       </option>
                     ))}
                   </select>
+                  {loading.topics && <div className="loading-indicator">Loading topics...</div>}
                 </div>
               </div>
 
@@ -528,134 +600,136 @@ const AssessmentsPage = () => {
           </div>
         </div>
 
-{assessments.filter(a => a.type === assessmentType).length > 0 ? (
-  <div className="assignments-grid">
-    {assessments.filter(a => a.type === assessmentType).map((assessment) => (
-      <div key={assessment._id} className="assignment-card">
-        <div className="assignment-header">
-          <h3>{assessment.title}</h3>
-          {assessment.type === 'exam' && assessment.code && (
-            <span className="exam-code">{assessment.code}</span>
-          )}
-          <div className="assignment-actions">
-            <button 
-              className="action-btn primary"
-              onClick={() => {
-                setSelectedAssessment(assessment);
-                setShowQuestionsModal(true);
-              }}
-            >
-              <i className="fas fa-question-circle"></i>
-              Questions
-            </button>
-            <button 
-              className="action-btn primary"
-              onClick={() => {
-                setSelectedAssessment(assessment);
-                setShowResultsModal(true);
-              }}
-            >
-              <i className="fas fa-chart-bar"></i>
-              Results
-            </button>
-            <button 
-              className="action-btn edit"
-              onClick={() => handleEdit(assessment)}
-            >
-              <i className="fas fa-edit"></i>
-              Edit
-            </button>
-            <button 
-              className="action-btn delete"
-              onClick={() => handleDelete(assessment._id, assessment.type)}
-            >
-              <i className="fas fa-trash"></i>
-              Delete
-            </button>
-          </div>
-        </div>
-        
-        <div className="assignment-content">
-          {assessment.description && (
-            <p className="assignment-description">{assessment.description}</p>
-          )}
-          
-          <div className="assignment-meta">
-            <div className="meta-row">
-              <span className="meta-item">
-                <i className="fas fa-book"></i>
-                <strong>Course:</strong> {assessment.course?.courseName || 'N/A'}
-              </span>
-              <span className="meta-item">
-                <i className="fas fa-tag"></i>
-                <strong>Topic:</strong> {assessment.topic?.name || 'N/A'}
-              </span>
-            </div>
-            <div className="meta-row">
-              <span className="meta-item">
-                <i className="fas fa-calendar"></i>
-                <strong>{assessment.type === 'assignment' ? 'Due:' : 'Scheduled:'}</strong> 
-                {formatDate(assessment.type === 'assignment' ? assessment.dueDate : assessment.scheduledAt)}
-                {assessment.type === 'assignment' && assessment.dueDate && isOverdue(assessment.dueDate) && (
-                  <span className="overdue-badge">Overdue</span>
-                )}
-              </span>
-              <span className="meta-item">
-                <i className="fas fa-star"></i>
-                <strong>Points:</strong> {assessment.totalPoints || 0}
-              </span>
-            </div>
-            <div className="meta-row">
-              <span className="meta-item">
-                <i className="fas fa-users"></i>
-                <strong>Participants:</strong> 
-                {assessment.type === 'assignment' ? 
-                  (assessment.attempts?.length || 0) : 
-                  (assessment.attempts?.filter(a => a.status === 'submitted').length || 0)}
-              </span>
-              <span className="meta-item">
-                <i className="fas fa-chart-line"></i>
-                <strong>Avg Score:</strong> 
-                {assessment.type === 'assignment' ? 
-                  (assessment.attempts?.length ? 
-                    Math.round(assessment.attempts.reduce((sum, a) => sum + (a.score || 0), 0) / assessment.attempts.length) : 
-                    0) :
-                  (assessment.attempts?.filter(a => a.status === 'graded').length ? 
-                    Math.round(assessment.attempts.filter(a => a.status === 'graded')
-                      .reduce((sum, a) => sum + (a.percentage || 0), 0) / 
-                      assessment.attempts.filter(a => a.status === 'graded').length) : 
-                    0)}%
-              </span>
-            </div>
-          </div>
+        {assessments.filter(a => a.type === assessmentType).length > 0 ? (
+          <div className="assignments-grid">
+            {assessments.filter(a => a.type === assessmentType).map((assessment) => (
+              <div key={assessment._id} className="assignment-card">
+                <div className="assignment-header">
+                  <h3>{assessment.title}</h3>
+                  {assessment.type === 'exam' && assessment.code && (
+                    <span className="exam-code">{assessment.code}</span>
+                  )}
+                  <div className="assignment-actions">
+                    <button 
+                      className="action-btn primary"
+                      onClick={() => {
+                        setSelectedAssessment(assessment);
+                        setShowQuestionsModal(true);
+                      }}
+                    >
+                      <i className="fas fa-question-circle"></i>
+                      Questions
+                    </button>
+                    <button 
+                      className="action-btn primary"
+                      onClick={() => {
+                        setSelectedAssessment(assessment);
+                        setShowResultsModal(true);
+                      }}
+                    >
+                      <i className="fas fa-chart-bar"></i>
+                      Results
+                    </button>
+                    <button 
+                      className="action-btn edit"
+                      onClick={() => handleEdit(assessment)}
+                    >
+                      <i className="fas fa-edit"></i>
+                      Edit
+                    </button>
+                    <button 
+                      className="action-btn delete"
+                      onClick={() => handleDelete(assessment._id, assessment.type)}
+                    >
+                      <i className="fas fa-trash"></i>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="assignment-content">
+                  {assessment.description && (
+                    <p className="assignment-description">{assessment.description}</p>
+                  )}
+                  
+                  <div className="assignment-meta">
+                    <div className="meta-row">
+                      <span className="meta-item">
+                        <i className="fas fa-book"></i>
+                        <strong>Course:</strong> {assessment.course?.courseName || 'N/A'}
+                      </span>
+                      <span className="meta-item">
+                        <i className="fas fa-tag"></i>
+                        <strong>Topic:</strong> {assessment.topic?.name || 'N/A'}
+                      </span>
+                    </div>
+                    <div className="meta-row">
+                      <span className="meta-item">
+                        <i className="fas fa-calendar"></i>
+                        <strong>{assessment.type === 'assignment' ? 'Due:' : 'Scheduled:'}</strong> 
+                        {formatDate(assessment.type === 'assignment' ? assessment.dueDate : assessment.scheduledAt)}
+                        {assessment.type === 'assignment' && assessment.dueDate && isOverdue(assessment.dueDate) && (
+                          <span className="overdue-badge">Overdue</span>
+                        )}
+                      </span>
+                      <span className="meta-item">
+                        <i className="fas fa-star"></i>
+                        <strong>Points:</strong> {assessment.totalPoints || 0}
+                      </span>
+                    </div>
+                    <div className="meta-row">
+                      <span className="meta-item">
+                        <i className="fas fa-users"></i>
+                        <strong>Participants:</strong> 
+                        {assessment.type === 'assignment' ? 
+                          (assessment.attempts?.length || 0) : 
+                          (assessment.attempts?.filter(a => a.status === 'submitted').length || 0)}
+                      </span>
+                      <span className="meta-item">
+                        <i className="fas fa-chart-line"></i>
+                        <strong>Avg Score:</strong> 
+                        {assessment.type === 'assignment' ? 
+                          (assessment.attempts?.length ? 
+                            Math.round(assessment.attempts.reduce((sum, a) => sum + (a.score || 0), 0) / assessment.attempts.length) : 
+                            0) :
+                          (assessment.attempts?.filter(a => a.status === 'graded').length ? 
+                            Math.round(assessment.attempts.filter(a => a.status === 'graded')
+                              .reduce((sum, a) => sum + (a.percentage || 0), 0) / 
+                              assessment.attempts.filter(a => a.status === 'graded').length) : 
+                            0)}%
+                      </span>
+                    </div>
+                  </div>
 
-          <div className="assignment-status">
-            <span className={`status-badge ${assessment.status || 'draft'}`}>
-              {assessment.status || 'draft'}
-            </span>
-            <span className="type-badge">
-              {assessment.type}
-            </span>
+                  <div className="assignment-status">
+                    <span className={`status-badge ${assessment.status || 'draft'}`}>
+                      {assessment.status || 'draft'}
+                    </span>
+                    <span className="type-badge">
+                      {assessment.type}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        ) : (
+          <div className="no-assignments">
+            <div className="no-assignments-icon">
+              <i className="fas fa-clipboard-list"></i>
+            </div>
+            <h3>No {assessmentType === 'assignment' ? 'Assignments' : 'Exams'} Yet</h3>
+            <p>Create your first {assessmentType === 'assignment' ? 'assignment' : 'exam'} to get started!</p>
+            <button 
+              className="add-first-assignment-btn"
+              onClick={() => setShowForm(true)}
+            >
+              Create First {assessmentType === 'assignment' ? 'Assignment' : 'Exam'}
+            </button>
+          </div>
+        )}
       </div>
-    ))}
-  </div>
-) : (
-  <div className="no-assignments">
-    <div className="no-assignments-icon">
-      <i className="fas fa-clipboard-list"></i>
-    </div>
-    <h3>No {assessmentType === 'assignment' ? 'Assignments' : 'Exams'} Yet</h3>
-    <p>Create your first {assessmentType === 'assignment' ? 'assignment' : 'exam'} to get started!</p>
-    <button 
-      className="add-first-assignment-btn"
-      onClick={() => setShowForm(true)}
-    >
-      Create First {assessmentType === 'assignment' ? 'Assignment' : 'Exam'}
-    </button>
-  </div>
-)}
+
       {/* Questions Modal */}
       {showQuestionsModal && selectedAssessment && (
         <div className="modal-overlay">
@@ -810,7 +884,7 @@ const AssessmentsPage = () => {
         </div>
       )}
     </div>
-  </div>
-  
-  )}
+  );
+};
+
 export default AssessmentsPage;
