@@ -876,7 +876,7 @@ const AssessmentsPage = () => {
                 </div>
               ) : (
                 <div className="no-submissions">
-                  <p>No submissions yet for this assessment.</p>
+                  <p>No submissions wait yet for this assessment.</p>
                 </div>
               )}
             </div>
