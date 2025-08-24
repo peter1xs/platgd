@@ -1639,6 +1639,7 @@ app.delete('/cobotKidsKenya/tutors/:tutorId/assignments/:schoolId/classes/:class
   }
 });
 
+// == CLASS CODE ROUTES == //
 // Get all classes with their codes and details (without tutor population)
 app.get('/cobotKidsKenya/classCodes', async (req, res) => {
   try {
@@ -1995,7 +1996,7 @@ app.post('/cobotKidsKenya/verifyClassCode', async (req, res) => {
     });
   }
 });
-// ===== NOTES ROUTES ===== //
+// === NOTES ROUTES ===== //
 
 // GET all notes for a specific topic
 app.get('/cobotKidsKenya/courses/:courseId/topics/:topicId/notes', async (req, res) => {
