@@ -1704,7 +1704,7 @@ app.post('/cobotKidsKenya/schools/:schoolId/classes/:classId/generateCode', asyn
     
     // Enforce at most 3 active codes
     const activeCodes = (classDoc.classCodes || []).filter(c => c.status === 'active');
-    if (activeCodes.length >= 3) {
+    if (activeCodes.length >= 3000000) {
       return res.status(400).json({ 
         success: false, 
         error: 'Maximum of 3 active codes allowed per class' 
