@@ -3,7 +3,8 @@ const mongoose = require("mongoose"); // Missing import
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const Course = require("./models/Course.js");
-
+const School= require("./models/School.js");
+// const Course = require("./models/Course.js");
 // Import routes
 const studentRoutes = require('./routes/studentRoutes');
 const schoolRoutes = require('./routes/School.js');
