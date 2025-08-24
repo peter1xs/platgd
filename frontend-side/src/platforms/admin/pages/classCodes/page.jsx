@@ -18,7 +18,7 @@ const ClassCodesPage = () => {
       setClasses(response.data.data);
     } catch (err) {
       setError('Failed to fetch classes');
-      console.error('Error fetching classes:', err);
+      console.error('Error fetchings classes:', err);
     } finally {
       setLoading(false);
     }
@@ -27,7 +27,7 @@ const ClassCodesPage = () => {
   const generateClassCode = async (schoolId, classId) => {
     try {
       const response = await axios.post(`https://platform-zl0a.onrender.com/cobotKidsKenya/schools/${schoolId}/classes/${classId}/generateCode`, {
-        generatedBy: 'admin' // You can replace this with actual admin ID
+        generatedBy: 'admin' // an replace this with actual admin ID
       });
       
       if (response.data.success) {

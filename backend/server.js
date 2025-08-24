@@ -1,28 +1,29 @@
-const Course = require("./models/Course.js"); // Make sure to import your Course model
-const router = express.Router();
+const express = require("express");
+const mongoose = require("mongoose"); // Missing import
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const Course = require("./models/Course.js");
+
+// Import routes
 const studentRoutes = require('./routes/studentRoutes');
 const schoolRoutes = require('./routes/School.js');
-const studentAuthRoutes = require('./routes/studentAuth'); // Add this line
-const jwt = require('jsonwebtoken');
+const studentAuthRoutes = require('./routes/studentAuth');
 
 const app = express();
+
 // Middleware
 app.use(express.json());
 app.use(cors({
-   origin: '*',
+  origin: '*',
 }));
-
-
-
-
-
 
 // Database Connection
 mongoose.connect("mongodb+srv://cobotkidsacademy:3eJkIfTpBU7ggj1O@cluster0.fhyc2xl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log("MongoDB connected successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
-// Class Code Routes
+
+//  Class Code Routes
 const classSchema = new mongoose.Schema({
   className: {
     type: String,
