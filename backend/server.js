@@ -1637,7 +1637,6 @@ app.delete('/cobotKidsKenya/tutors/:tutorId/assignments/:schoolId/classes/:class
   }
 });
 
-
 // Get all classes with their codes and details (without tutor population)
 app.get('/cobotKidsKenya/classCodes', async (req, res) => {
   try {
@@ -2590,7 +2589,7 @@ function calculateGrade(percentage) {
 // ===== ASSESSMENT ROUTES ===== //
 
 // GET all assessments (both assignments and exams) for a course
-app.get('/cobotKidsKenya/courses/:courseId/assessments', async (req, res) => {
+app.get('/cobotKidsKenya/courses/assignments', async (req, res) => {
   try {
     const { courseId } = req.params;
     
