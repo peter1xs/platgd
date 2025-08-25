@@ -113,11 +113,11 @@ function LogIn() {
   }
 };
   return (
-    <div className="student-login-container">
-      <div className="login-form">
-        <h2>Welcome Back!</h2>
-        <p className="subtitle">Please login to continue</p>
-        <form onSubmit={handleSubmit}>
+     <div class="student-login-container">
+        <div class="login-form">
+            <h2>Welcome Back!</h2>
+            <p class="subtitle">Please login to continue</p>
+             <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">User Name</label>
             <input
@@ -160,15 +160,15 @@ function LogIn() {
             {loading ? "Logging in..." : "Login"}
           </button>
           {error && <div className="error-message">{error}</div>}
-        </form>
+        </form>     
 
-        <div className="bg-white p-3 rounded w-25">
-          <p>Don't have an account?</p>
-          <Link className="btn btn-default border w-100 bg-light rounded-0 text-decoration-none">
-            Ask Your Teacher
-          </Link>
+            <div class="signup-section">
+                <p>Don't have an account?</p>
+                <a href="#" class="signup-btn">
+                    Ask Your Teacher
+                </a>
+            </div>
         </div>
-      </div>
     </div>
   );
 }

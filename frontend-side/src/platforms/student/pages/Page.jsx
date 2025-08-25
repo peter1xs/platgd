@@ -302,9 +302,9 @@ const StudentDashBoard = () => {
             <div className="challenges-section">
               <h2>Current Challenges</h2>
               <div className="challenges-list">
-                {challenges.map((challenge) => (
+               
                   <ComingSoon />
-                ))}
+                
               </div>
             </div>
           )}
