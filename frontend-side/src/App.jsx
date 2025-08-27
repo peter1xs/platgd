@@ -21,7 +21,7 @@ import Dashboard from "./platforms/admin/pages/dashboard/page";
 import ClassesPage from "./platforms/admin/pages/classes/page";
 
 // Tutors Imports
-import TutorLoginPage from "./platforms/tutor/page";
+import TutorLoginPage from "./platforms/tutor/TutorLoginPage";
 // import TutorCreateAccount from "./platforms/tutor/TutorCreateAccount";
 // import ClassCodeGenarator from "./platforms/tutor/ClassCodeGenarator";
 import TutorDashboard from "./platforms/tutor/TutorDashboard";
