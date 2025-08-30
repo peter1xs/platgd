@@ -202,6 +202,5 @@ module.exports = {
   addClassToSchool,
   getSchoolClasses,
   getClass,
-  updateClass,
-  deleteClass
+  updateClass
 };
