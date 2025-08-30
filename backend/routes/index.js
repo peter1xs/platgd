@@ -1,18 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-// Import route files
-const classRoutes = require('./classRoutes');
-const courseRoutes = require('./courseRoutes');
-const schoolRoutes = require('./schoolRoutes');
-const studentRoutes = require('./studentRoutes');
-const topicRoutes = require('./topicRoutes');
-
-// Use routes
-router.use('/classCode', classRoutes);
-router.use('/courses', courseRoutes);
-router.use('/schools', schoolRoutes);
-router.use('/students', studentRoutes);
-router.use('/topics', topicRoutes);
+// This file is deprecated - routes are now handled directly in server.js
+// All routes have been moved to their respective route files
+console.warn('⚠️  routes/index.js is deprecated. Routes are now handled in server.js');
 
 module.exports = router;
