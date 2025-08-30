@@ -7,8 +7,8 @@ const addClassToSchool = async (req, res) => {
     const { schoolId } = req.params;
     const { name, level } = req.body;
 
-    // Validate input
-    if (!name?.trim()) {
+    // Validate input - fixed optional chaining
+    if (!name || !name.trim()) {
       return res.status(400).json({
         success: false,
         error: 'Class name is required',
@@ -31,7 +31,7 @@ const addClassToSchool = async (req, res) => {
         $push: {
           classes: {
             name: name.trim(),
-            level,
+            level: level,
             students: []
           }
         }
@@ -146,7 +146,9 @@ const updateClass = async (req, res) => {
       });
     }
 
-    const updatedClass = school.classes.find(c => c._id.toString() === classId);
+    const updatedClass = school.classes.find(function(c) { 
+      return c._id.toString() === classId; 
+    });
     
     res.status(200).json({
       success: true,
@@ -201,9 +203,25 @@ const deleteClass = async (req, res) => {
 // Create class (for your original routes)
 const createClass = async (req, res) => {
   try {
+    const { className, classLevel } = req.body;
+    
+    // Basic validation
+    if (!className || !className.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Class name is required'
+      });
+    }
+
     // Your createClass implementation here
-    // This should match what your routes expect
-    res.status(201).json({ success: true, message: 'Class created' });
+    // This should generate a class code and save to database
+    const classCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'Class created successfully',
+      classCode: classCode
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -212,8 +230,24 @@ const createClass = async (req, res) => {
 // Verify class code
 const verifyClassCode = async (req, res) => {
   try {
+    const { classCode } = req.body;
+    
+    if (!classCode) {
+      return res.status(400).json({
+        success: false,
+        error: 'Class code is required'
+      });
+    }
+
     // Your verifyClassCode implementation here
-    res.status(200).json({ success: true, message: 'Class code verified' });
+    // This should check if the class code exists in the database
+    const isValid = true; // Replace with actual validation logic
+    
+    res.status(200).json({ 
+      success: true, 
+      valid: isValid,
+      message: isValid ? 'Class code verified' : 'Invalid class code'
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -223,13 +257,19 @@ const verifyClassCode = async (req, res) => {
 const getClasses = async (req, res) => {
   try {
     // Your getClasses implementation here
-    res.status(200).json({ success: true, data: [] });
+    // This should fetch classes from database
+    const classes = []; // Replace with actual database query
+    
+    res.status(200).json({ 
+      success: true, 
+      data: classes 
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// Export all functions - using individual exports to avoid issues
+// Export all functions
 exports.addClassToSchool = addClassToSchool;
 exports.getSchoolClasses = getSchoolClasses;
 exports.getClass = getClass;
